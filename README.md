@@ -1,2 +1,1 @@
-# TypeScriptCourse
-Notes created by me while taking a TypeScript programming course
+Notes compiled while I was taking a TypeScript course
