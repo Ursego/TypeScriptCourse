@@ -1,11 +1,12 @@
 //### Structural Type System
 
-// One of TypeScript’s core principles is that type checking focuses on the shape that values have. This is sometimes called “duck typing” or “structural typing”.
+// One of TypeScript’s core principles is that type checking focuses on the shape that values have.
+// This is sometimes called “duck typing” or “structural typing”.
 // If two types have the same shape, they are considered to be of the same type (compatible), regardless of their explicit names or declarations.
 
 // Type compatibility is determined based on the structure of the types rather than their explicit declarations.
 // There is no difference between how classes and objects conform to shapes.
-// If the object or class has all the required properties, TypeScript will say they match, regardless of the implementation details
+// If the object or class has all the required properties, TypeScript will say they match, regardless of the implementation details.
 
 // Key Concepts of Structural Type System:
 //	Duck Typing:
@@ -85,8 +86,9 @@ logPoint(color);
 //		If the types have index signatures (i.e., a way to index into the type), these must be compatible.
 
 // Subtyping:
-//		TypeScript allows for excess property checks. Therefore, an object can have more properties than required by the type it is being assigned to (but not fewer).
+//		TypeScript allows for excess property checks.
+//    Therefore, an object can have more properties than required by the type it is being assigned to (but not fewer).
 
 // The structural type system allows for flexible and intuitive type compatibility by focusing on the shape or structure of types
-// rather than their explicit names or declarations.
+//    rather than their explicit names or declarations.
 // This system enables easier code reuse and interoperability but requires careful consideration of type shapes to avoid unintended type mismatches.

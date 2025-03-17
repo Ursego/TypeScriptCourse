@@ -97,7 +97,7 @@ logLength([1, 2, 3]); // Outputs: 3
 
 
 
-// Generic (параметр обобщенного типа):
+// Generic (generic type parameter):
 type FilterFuncType = {
 	<T>(array: T[], callbackFunc: (item: T) => boolean): T[] // TypeScript will INFER the type from the actually passed values
 }
@@ -123,18 +123,19 @@ let namesArray = [
 ]
 filter(namesArray, _ => _.firstName.startsWith('b')) // returns [{firstName: 'beth'}, {firstName: 'buba'}]
 
-// Мы объявили <T> как часть сигнатуры вызова (перед скобками), и TypeScript привяжет конкретный тип к T, когда мы вызовем функцию типа FilterFuncType. Если бы мы вместо этого ограничили диапазон T псевдонимом типа FilterFuncType, TypeScript потребовал бы от нас при использовании FilterFuncType привязать тип явно:
-// T объявлен как часть типа FilterFuncType (а не часть конкретной сигнатуры типа), и TypeScript привяжет T, когда вы объявите функцию типа FilterFuncType:
+// We declared <T> as part of the call signature (before the parentheses), and TypeScript will bind a concrete type to T when we call a function of type FilterFuncType. If we had instead limited the range of T to the type alias FilterFuncType, TypeScript would require us to explicitly bind the type when using FilterFuncType:
+// T is declared as part of the type FilterFuncType (not part of the concrete type signature), and TypeScript will bind T when you declare a function of type FilterFuncType:
 type FilterFuncType<T> = {
 	(array: T[], f: (item: T) => boolean): T[]
 }
-let filter: FilterFuncType = (array, f) => // ... // Ошибка: обобщенный тип 'Filter' требует 1 аргумент типа.
-type OtherFilter = FilterFuncType // Ошибка: условный тип 'FilterFuncType' требует 1 аргумент типа.
+let filter: FilterFuncType = (array, f) => // ... // Error: Generic type 'Filter' requires 1 type argument.
+type OtherFilter = FilterFuncType // Error: Conditional type 'FilterFuncType' requires 1 type argument.
 let filter: FilterFuncType<number> = (array, f) => // ...
 type StringFilterFuncType = FilterFuncType<string>
 let stringFilter: StringFilterFuncType = (array, f) => // ...
 
-// Единственное допустимое место для объявления обобщенного типа в псевдониме типа находится сразу после имени псевдонима типа и перед его присваиванием (=). Определим тип MyEvent, описывающий событие DOM вроде click или mousedown:
+// The only valid place to declare a generic type in a type alias is immediately after the type alias name and before its assignment (=).
+// Let's define a type MyEvent that describes a DOM event like click or mousedown:
 type MyEvent<T> = {
 	target: T
 	type: string
@@ -144,33 +145,33 @@ let myEvent: MyEvent<HTMLButtonElement | null> = {
 	target: document.querySelector('#myButton'),
 	type: 'click'
 }
-// Также можете использовать псевдоним обобщенного типа в сигнатуре функции. Когда TypeScript привяжет тип к T, он также привяжет его и к MyEvent:
+// You can also use a generic type alias in the function signature. When TypeScript binds the type to T, it will also bind it to MyEvent:
 function triggerEvent<T>(event: MyEvent<T>): void {
 	// ...
 }
-triggerEvent({ // T является Element | null
+triggerEvent({ // T is Element | null
 	target: document.querySelector('#myButton'),
 	type: 'mouseover'
 })
 
-// Подобно тому как вы задаете параметрам функции значения по умолчанию, вы можете задавать предустановки обобщенным типам:
+// Just as you give function parameters default values, you can give generic types presets:
 type MyEvent<T = HTMLElement> = {
 	target: T
 	type: string
 }
-// Или добавить ограничение для T, чтобы убедиться, что T является HTML-элементом:
+// Or add a constraint on T to ensure that T is an HTML element:
 type MyEvent<T extends HTMLElement = HTMLElement> = {
 	target: T
 	type: string
 }
-// Подобно опциональным параметрам в функции, обобщенные типы с предустановками должны идти после обобщенных типов без предустановок:
-// Хорошо:
+// Like optional parameters in a function, generic types with presets should come after generic types without presets:
+// Good:
 type MyEvent2<Type extends string, Target extends HTMLElement = HTMLElement> = {
 	target: Target
 	type: Type
 }
-// Плохо:
-type MyEvent3<Target extends HTMLElement = HTMLElement, Type extends string> = { // Ошибка: необходимые параметры типов не могут следовать за опциональными
+// Bad:
+type MyEvent3<Target extends HTMLElement = HTMLElement, Type extends string> = { // Error: Required type parameters cannot follow optional ones
 	target: Target
 	type: Type
 }
