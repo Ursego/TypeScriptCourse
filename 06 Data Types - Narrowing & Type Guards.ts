@@ -72,7 +72,7 @@ function isCat(animal: Dog | Cat): animal is Cat {
   return animal instanceof Cat;
 }
 // The reason for sometimes using the (animal as Dog).bark !== undefined pattern is to demonstrate a more general approach that can handle cases
-// where instanceof might not work as expected, such as with interfaces or plain objects.
+//    where instanceof might not work as expected, such as with interfaces or plain objects.
 
 // @@@ 'this'-based type guard function
 

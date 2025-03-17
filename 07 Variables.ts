@@ -15,20 +15,20 @@
 // 		Block Scoped: The scope of a const variable is the block where it is defined.
 // 		No Hoisting Issues: Similar to let, accessing a const variable before its declaration results in a ReferenceError.
 // 		Immutable Binding: A const variable cannot be reassigned. However, if the const variable is an object or array, its properties or elements can be modified.
-// 		Её значение может быть установлено только после определения переменной и не может быть изменено впоследствии.
+// 		Its value can only be set after the variable is defined and cannot be changed subsequently.
 
 // var:
 // We can use a variable before it is defined.
 // If the runtime encounters a variable that has not been defined or assigned a value before, then the value of that variable will be undefined:
-console.log('anyValue = ${anyValue}'); // anyValue = undefined
-var anyValue = 2;
+console.log('anyValue = ${anyValue}'); // anyValue = undefined; since anyValue doesn't exist, this line creates it
+var anyValue = 2; // redefine anyValue (create another var with the same name which replaces the existing one)
 // When using the var keyword, there is no check to see if the variable itself has been defined before we actually use it.
 // This can lead to undesirable behavior.
 
 // let:
 // One of the advantages of using the let keyword is that we cannot use the variable name before it is defined:
-console.log('letValue = ${lValue}');
-let lValue = 2; // Error: Block-scoped variable 'lValue' used before its declaration
+console.log('letValue = ${lValue}'); // Error: Block-scoped variable 'lValue' used before its declaration
+let lValue = 2;
 // Variables defined with let have block-level scope:
 let lValue = 2;
 console.log('lValue = ${lValue}'); // "lValue = 2"
@@ -113,7 +113,7 @@ function liveDangerously(x?: number | undefined) {
 // However, all these appoaches are dangerous since they can hide bugs.
 // They can lead to runtime errors if the variable is indeed uninitialized, but may not be caught on testing in some specific branches of logic.
 // You do want this error if the var is supposed to be populated when read from, so do you best NOT to use ! (in both declaring and reading from the var).
-// The only case when you have no choise it's when the var is populated not in the scope where it is declared.
+// The only case when you have no choise it's when the var is populated not in the scope where it is declared and read from.
 
 //### Optional parameters and variables (?)
 
