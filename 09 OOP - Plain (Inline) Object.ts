@@ -158,45 +158,24 @@ interface Circle {
 }
 type ColorfulCircle = Colorful & Circle;
 
-//### Object rest and Object spread (the ... operator)
+//### ... as the SPREAD operator
 
-// In TypeScript (and JavaScript), the object rest and spread operators (...) are powerful features that allow for concise and flexible manipulation of objects.
-// These operators are used to extract properties from objects (rest) and combine properties from multiple objects (spread).
-
-// @@@ Object Rest
-// The object rest operator allows you to extract remaining properties from an object into a new object.
-// This is useful when you want to separate some properties from the rest of the properties in an object.
-
-const person = {
-  name: "Alice",
-  age: 25,
-  occupation: "Engineer",
-  country: "USA",
-};
-
-// Extract name and age properties, and the rest goes into theRestOfTheProperties object
-const { name, age, ...theRestOfTheProperties } = person;
-
-console.log(name); // Outputs: Alice
-console.log(age); // Outputs: 25
-console.log(theRestOfTheProperties); // Outputs: { occupation: 'Engineer', country: 'USA' }
-
-// Using the rest operator to copy all the properties of one object to another
-// (in fact, we extract ALL the properties, so the name REST operator is a bit confusing):
+// The ... operator allows you to extract ALL the properties from one object and copy to another:
 let origSheep = { id: 1, name: "Dolly" };
 let clonedSheep = { ...origSheep };
 console.log('clonedSheep : ${JSON.stringify(clonedSheep)}'); // clonedSheep : {"id":1,"name":"Dolly"}
 
-// Using the rest operator to add values ​​to an existing array:
-let arr = [1, 2, 3, 4, 5];
-console.log('arr=${arr}'); // arr=1,2,3,4,5
-arr = [...arr, 6, 7, 8]; // again, we extract ALL the elements, not the REST
-console.log('arr=${arr}'); // arr=1,2,3,4,5,6,7,8
+// Adding new properties and overriding existing ones:
+const updatedPerson = {
+  ...person, // extract all the properties from person,
+  age: 26, // then override one of them,
+  country: "USA", // and then add a new property
+};
+console.log(updatedPerson); // Outputs: { name: 'Alice', age: 26, country: 'USA' }
 
-// @@@ Object Spread
-// The object spread operator allows you to create a new object by combining the properties of existing objects.
-// This is useful for cloning objects or merging multiple objects into one.
+// @@@ Merging multiple objects into one
 
+// The object spread operator allows you to create a new object by combining the properties of existing objects:
 const person = {
   name: "Alice",
   age: 25,
@@ -214,14 +193,6 @@ const worker = {
 };
 console.log(worker); // Outputs: { name: 'Alice', age: 25, occupation: 'Engineer', company: 'TechCorp' }
 
-// Adding new properties and overriding existing ones
-const updatedPerson = {
-  ...person,
-  age: 26, // overrides the existing age property
-  country: "USA", // adds a new property
-};
-console.log(updatedPerson); // Outputs: { name: 'Alice', age: 26, country: 'USA' }
-
 // When using object spread, properties will be copied incrementally.
 // In other words, if two objects have a property with the same name, the property of the object specified last will take precedence:
 let objPrec1 = { id: 1, name: "object prec 1" };
@@ -229,8 +200,24 @@ let objPrec2 = { id: 1001, description: "object prec 2 descripton" }
 let obj4 = { ...objPrec1, ...objPrec2 }; // that takes id of the last listed object, i.e. 1001
 console.log('obj4 : ${JSON.stringify(obj4)}'); // obj4 : {"id":1001,"name":"object prec 1","description":"object prec 2 descripton"}
 
-// @@@ Combining Rest and Spread
-// You can also combine object rest and spread operators for more advanced object manipulations.
+// Using the spread operator to add values ​​to an existing array:
+let arr = [1, 2, 3, 4, 5];
+console.log('arr=${arr}'); // arr=1,2,3,4,5
+arr = [...arr, 6, 7, 8];
+console.log('arr=${arr}'); // arr=1,2,3,4,5,6,7,8
+
+//### ... as the REST operator
+
+// The ... operator allows you to extract the REMAINING properties from one object and copy to another:
+
+// That happens when the ... operator follows at least one explicitly named property or element.
+// It collects all remaining properties that weren't explicitly named in the destructuring pattern.
+
+// The destructuring assignment must follow this pattern:
+// * Specific properties extracted individually are listed first.
+// * The rest operator is the last element, as it captures "everything else" after specific items have been extracted.
+// In the previous examples (where ... is used as the SPREAD operator), this pattern was not followed, so ALL properties were extracted.
+
 const person = {
   name: "Alice",
   age: 25,
@@ -238,14 +225,25 @@ const person = {
   country: "USA",
 };
 
-// Extract name and age, and create a new object with remaining properties
-const { name, age, ...theRestOfTheProperties } = person; // theRestOfTheProperties contains { occupation: 'Engineer', country: 'USA'}
+// Extract name and age individually, and create a new object with the REST of the properties:
+const { name, age, ...theRestOfTheProperties } = person; // that declares three constants: name, age and theRestOfTheProperties
+console.log(name); // Outputs: Alice
+console.log(age); // Outputs: 25
+console.log(theRestOfTheProperties); // Outputs: { occupation: 'Engineer', country: 'USA' }
 
-// Create a new object with some properties from theRestOfTheProperties and additional properties
-const updatedPerson = {
-  ...theRestOfTheProperties,
-  country: "Canada", // overrides the country property
-  city: "Toronto", // adds a new property
-};
-console.log(updatedPerson);
-// Outputs: { occupation: 'Engineer', country: 'Canada', city: 'Toronto' }
+// TypeScript will check if name & age properties exist in person.
+// If they don't, and if you have strict type checking enabled, TypeScript will show a compilation error.
+// TypeScript will infer the types of name & age based on the type of person.
+// If name & age properties don't exist in person and strict type checking is disabled, name & age constants will be created as undefined.
+
+// Using the REST operator as vararg in functions
+
+// When used in function parameters, it collects multiple actual parameters into a single array:
+function myFunc(arg1: string, arg2: string, ...args: number[]) {
+  ...
+}
+// Sample calls:
+myFunc("aaa", "bbb");
+myFunc("aaa", "bbb", 1);
+myFunc("aaa", "bbb", 1, 2);
+myFunc("aaa", "bbb", 1, 2, 3);
