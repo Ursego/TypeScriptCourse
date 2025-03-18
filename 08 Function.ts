@@ -22,7 +22,7 @@ let concat1string = concatStrings("a"); // error: Expected 2-3 arguments, but go
 // Note that when we set 'c' to a default value, we:
 //		remove its optional ? annotation (obviously, a default value makes the parameter optional);
 //		don't specify the type (it's inferred from the default value):
-function concatStringsDefault( a: string, b: string, c = "c") {
+function concatStringsDefault(a: string, b: string, c = "c") {
 	return a + b + c;
 }
 let s1 = concatStringsDefault("a", "b"); // "abc"
@@ -66,7 +66,7 @@ function printCoord(pt: { x: number; y: number }) { // you can use , or ; to sep
 }
 printCoord({ x: 3, y: 7 });
 
-// In fact, this is the way to access args BY NAME when calling a finction!!!!!!!!!!!!!!!!!!!!
+// In fact, this is the way to access args BY NAME when calling a finction!
 function printName(arg: { first: string; last?: string }) {
 	console.log(arg.last.toUpperCase());
 	if (arg.last !== undefined) {
@@ -84,26 +84,26 @@ printName({ first: "Alice", last: "Alisson" });
 // Named function:
 function greet(name: string) {
   return 'hello ' + name
-  }
-  // Function expression:
-  let greet2 = function(name: string) {
+}
+// Function expression:
+let greet2 = function(name: string) {
   return 'hello ' + name
-  }
-  // Arrow function expression:
-  let greet3 = (name: string) => {
+}
+// Arrow function expression:
+let greet3 = (name: string) => {
   return 'hello ' + name
-  }
-  // Shorthand arrow function expression:
-  let greet4 = (name: string) => 'hello ' + name
-  // Function constructor:
+}
+// Shorthand arrow function expression:
+let greet4 = (name: string) => 'hello ' + name
+// Function constructor:
 let greet5 = new Function('name', 'return "hello " + name')
 
 // Except for the function constructor (which is deprecated), these syntaxes are supported by TypeScript in type-safe mode
-// and follow the rules about mandatory type annotations on parameters and optional annotations on return types.
+//    and follow the rules about mandatory type annotations on parameters and optional annotations on return types.
 // If you type the last example into the editor, you'll see the Function type.
 // This is a callable object (if you put () behind it), which has all the prototype methods from Function.prototype.
-// But its parameters and return type are untyped, and you can call such a function with any arguments,
-// and TypeScript will not even react to such illegal actions.
+// But its parameters and return type are untyped - you can call such a function with any arguments,
+//    and TypeScript will not even react to such illegal actions.
 
 //### "this" in functions
 
@@ -200,9 +200,9 @@ console.log(multiply(5, 3)); // Output: 15
 // Arrow functions do not have their own arguments object.
 // If you need to access arguments, you must use a regular function or rest parameters.
 
-// @@@ Usage arrow functions with callbacks
+// @@@ Usage arrow functions as a callbacks
 const numbers = [1, 2, 3, 4, 5];
-const squares = numbers.map(n => n * n); // using arrow function as a callback
+const squares = numbers.map(n => n * n);
 console.log(squares); // Output: [1, 4, 9, 16, 25]
 // Let's create an example function that accepts a callback function as an argument and uses it within the function:
 const processItem: (item: string) => string = (item: string) => {
@@ -216,22 +216,22 @@ function processItems(items: string[], callback: (item: string) => string) {
 }
 const items = ['apple', 'banana', 'cherry'];
 processItems(items, processItem); // use a pointer to an arrow function as the callback
-processItems(items, item => item.toUpperCase()); // use inline arrow function as the callback (the same result)
+processItems(items, item => item.toUpperCase()); // use an inline arrow function as the callback (the same result)
 
 // We see that the arrow function's signature is described twice (in processItem and in processItems).
 // If the same arrow function's signature is used in more than one piece of code, refactor it outside using a type alias:
-type ItemProcessor = (item: string) => string;
-const processItem: ItemProcessor = (item: string) => { // create a constant of that type (and the function object for the constant to poin to)
+type ItemProcessorFuncType = (item: string) => string;
+const processItem: ItemProcessorFuncType = (item: string) => { // create a constant of that type (and the function object for the constant to poin to)
   return item.toUpperCase();
 };
-function processItems(items: string[], callback: ItemProcessor) { ... }
+function processItems(items: string[], callback: ItemProcessorFuncType) { ... }
 // That approach brings the next advantages:
 //	1. We avoid code duplication.
-//	2. We enforce type safety: changing the ItemProcessor type in the future will enforce the developer to fix all the fragments where it's used.
-//	3. A powerful feature of self-documented code: if the signature is more complex, it immediately conveys the idea that it's the same signature.
+//	2. We enforce type safety: changing the ItemProcessorFuncType type in the future will enforce the developer to fix all the fragments where it's used.
+//	3. A powerful feature of self-documented code: if the signature is more complex, it immediately tells the developer that it's the same signature.
 
 // Notice that a type alias which defines an arrow function can be used for regular (non-arrow) functions too:
-function processItemRegular(item: string): string { // matches the ItemProcessor type
+function processItemRegular(item: string): string { // matches the ItemProcessorFuncType type
   return item.toUpperCase();
 }
 processItems(items, processItemRegular); // use a regular function as the callback (the same result)
@@ -274,7 +274,7 @@ displayPerson(person); // Output: Name: Alice, Age: 25
 
 // Generators use the yield keyword to yield values.
 // When the user asks the generator for the next value (e.g. by calling next), yield will send the result back to the user
-// and pause until the next value is requested.
+//    and pause until the next value is requested.
 // We called createFibonacciGenerator, and it returned an IterableIterator.
 // Each time next is called, the iterator computes the next Fibonacci number and yield returns it to us:
 function* createFibonacciGenerator() {

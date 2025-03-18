@@ -45,11 +45,11 @@ interface Person {
   age: number;
   isStudent: boolean;
   hobbies: string[];
-  address: Address;
+  address: Address; // <<<<<<< address must be of type Address
   greet: () => void;
 }
 
-let person: Person = {
+let person: Person = { // <<<<<<< person must be of type Person
   name: "Alice",
   age: 30,
   isStudent: false,
@@ -63,37 +63,7 @@ let person: Person = {
     console.log("Hello!");
   }
 };
-
-// Using a Type Alias:
-type Address = {
-  street: string;
-  city: string;
-  zipCode: number;
-};
-
-type Person = {
-  name: string;
-  age: number;
-  isStudent: boolean;
-  hobbies: string[];
-  address: Address;
-  greet: () => void;
-};
-
-let person: Person = {
-  name: "Alice",
-  age: 30,
-  isStudent: false,
-  hobbies: ["reading", "traveling"],
-  address: {
-    street: "123 Main St",
-    city: "Wonderland",
-    zipCode: 12345
-  },
-  greet: function() {
-    console.log("Hello!");
-  }
-};
+// The result would be the same if instead of 'interface' we would write 'type'.
 
 //### Optional properties
 // Much of the time, we’ll find ourselves dealing with objects that might have a property set.
@@ -111,7 +81,7 @@ paintShape({ shape, yPos: 100 });
 paintShape({ shape, xPos: 100, yPos: 100 });
 
 //### readonly properties
-// Properties can also be marked as readonly for TypeScript.
+// Properties can also be marked as readonly.
 // While it won’t change any behavior at runtime, a property marked as readonly can’t be written to during type-checking.
 interface SomeType {
   readonly prop: string = "Hi!";
@@ -129,11 +99,13 @@ interface Home {
 function visitForBirthday(home: Home) {
   // We can read and update properties from 'home.resident'.
   console.log(`Happy birthday ${home.resident.name}!`);
-  home.resident.age++; // success - we don't change resident, we chage its property
+  home.resident.name = "John"; // success - we don't change resident, we chage its property
+  home.resident.age = 49; // success - we don't change resident, we chage its property
+  home.resident = { name: "John"; age: 49 } // error: Cannot assign to 'prop' because it is a read-only property.
 }
 
 //### Accessing properties:
-// При работе с объектами JavaScript довольно часто их определяют с помощью имен свойств, которые являются строками, как видно из приведенного ниже кода:
+// When working with TypeScript objects, it is quite common to define them using property names that are strings, as seen in the code below:
 let normalObject = { // the normal way
 	id : 1,
 	name : "test" }
@@ -141,9 +113,9 @@ let stringObject = { // properties names are strings!
 	"testProperty": 1,
 	"anotherProperty": "this is a string"
 }
- // Мы можем обращаться к этим строковым свойствам двумя способами:
+ // We can access these string properties in two ways:
 let testProperty = stringObject.testProperty; // the normal way
-let testStringProperty = stringObject["testProperty"]; // the assotiative array / hashtable syntax
+let testStringProperty = stringObject["testProperty"]; // the Map-like syntax
 
 //### Extending Types
 
@@ -209,16 +181,17 @@ console.log(name); // Outputs: Alice
 console.log(age); // Outputs: 25
 console.log(theRestOfTheProperties); // Outputs: { occupation: 'Engineer', country: 'USA' }
 
-// Copy all the properties of firstObj to another object called secondObj using the rest operator syntax:
-let firstObj = { id: 1, name: "firstObj" };
-let secondObj = { ...firstObj };
-console.log('secondObj : ${JSON.stringify(secondObj)}'); // secondObj : {"id":1,"name":"firstObj"}
+// Using the rest operator to copy all the properties of one object to another
+// (in fact, we extract ALL the properties, so the name REST operator is a bit confusing):
+let origSheep = { id: 1, name: "Dolly" };
+let clonedSheep = { ...origSheep };
+console.log('clonedSheep : ${JSON.stringify(clonedSheep)}'); // clonedSheep : {"id":1,"name":"Dolly"}
 
-// Using the rest operator with arrays (in fact, in this example we extract ALL the properties, not the REST):
-let firstArray = [1, 2, 3, 4, 5];
-console.log('firstArray=${firstArray}'); // firstArray=1,2,3,4,5
-firstArray = [...firstArray, 6, 7, 8]; // use the rest operator syntax to add values ​​to an existing array
-console.log('firstArray=${firstArray}'); // firstArray=1,2,3,4,5,6,7,8
+// Using the rest operator to add values ​​to an existing array:
+let arr = [1, 2, 3, 4, 5];
+console.log('arr=${arr}'); // arr=1,2,3,4,5
+arr = [...arr, 6, 7, 8]; // again, we extract ALL the elements, not the REST
+console.log('arr=${arr}'); // arr=1,2,3,4,5,6,7,8
 
 // @@@ Object Spread
 // The object spread operator allows you to create a new object by combining the properties of existing objects.
@@ -235,12 +208,11 @@ const job = {
 };
 
 // Combine properties of `person` and `job` into a new object
-const personWithJob = {
+const worker = {
   ...person,
   ...job,
 };
-
-console.log(personWithJob); // Outputs: { name: 'Alice', age: 25, occupation: 'Engineer', company: 'TechCorp' }
+console.log(worker); // Outputs: { name: 'Alice', age: 25, occupation: 'Engineer', company: 'TechCorp' }
 
 // Adding new properties and overriding existing ones
 const updatedPerson = {
@@ -248,20 +220,13 @@ const updatedPerson = {
   age: 26, // overrides the existing age property
   country: "USA", // adds a new property
 };
-
 console.log(updatedPerson); // Outputs: { name: 'Alice', age: 26, country: 'USA' }
-
-// We can use this syntax to combine multiple objects. This is called object spread:
-let nameObj = { name: "nameObj" };
-let idObj = { id: 2 };
-let obj3 = { ...nameObj, ...idObj }; // copy all properties from nameObj and all properties from idObj to new object obj3
-console.log('obj3 : ${JSON.stringify(obj3)}'); // obj3 : {"name":"nameObj","id":2} - the properties of both objects were combined into one
 
 // When using object spread, properties will be copied incrementally.
 // In other words, if two objects have a property with the same name, the property of the object specified last will take precedence:
 let objPrec1 = { id: 1, name: "object prec 1" };
-let objPrec2 = { id: 1001, description: "object prec 2 descripton" } // overwrites 1 in id
-let obj4 = { ...objPrec1, ...objPrec2 };
+let objPrec2 = { id: 1001, description: "object prec 2 descripton" }
+let obj4 = { ...objPrec1, ...objPrec2 }; // that takes id of the last listed object, i.e. 1001
 console.log('obj4 : ${JSON.stringify(obj4)}'); // obj4 : {"id":1001,"name":"object prec 1","description":"object prec 2 descripton"}
 
 // @@@ Combining Rest and Spread
