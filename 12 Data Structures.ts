@@ -20,9 +20,9 @@ for(var itemKey in arrayOfStrings) {
 	console.log('arrayOfStrings[${itemKey}] = ${itemValue}');
 }
 
-// If we don't need to know the array keys and are just interested in the values ​​contained in the array, we can simplify iterating over arrays even more by using the for ....of syntax:
-for(var arrayItem of arrayOfStrings) {
-	console.log('arrayItem = ${arrayItem}');
+// To iterate over the values ​​contained in the array, use the "for ... of ..."" syntax:
+for(var value of arrayOfStrings) {
+	console.log('arrayItem = ${value}');
 }
 
 // TypeScript supports two syntaxes for arrays: T[] and Array<T>. They are identical in meaning and effect.
@@ -65,7 +65,6 @@ function buildArray() {
 let myArray = buildArray() // (string | number)[]
 myArray.push(true) // Error: Argument of type 'true' cannot be assigned to parameter of type 'string|number'.
 
-
 // Array is a generic type. Whenever we write out types like number[] or string[], that’s really just a shorthand for Array<number> and Array<string>.
 interface Array<Type> {
   /**
@@ -96,8 +95,8 @@ function doStuff(values: ReadonlyArray<string>) {
   values.push("hello!"); // error: Property 'push' does not exist on type 'readonly string[]'.
 }
 // Much like the readonly modifier for properties, it’s mainly a tool we can use for intent.
-// When we see a function that returns ReadonlyArrays, it tells us we’re not meant to change the contents at all, and when we see a function
-// that consumes ReadonlyArrays, it tells us that we can pass any array into that function without worrying that it will change its contents.
+// When we see a function that returns a ReadonlyArray, it tells us we’re not meant to change the contents at all, and when we see a function
+// 		that consumes aReadonlyArray, it tells us that we can pass any array into that function without worrying that it will change its contents.
 
 // Unlike Array, there isn’t a ReadonlyArray constructor that we can use:
 new ReadonlyArray("red", "green", "blue"); // error: 'ReadonlyArray' only refers to a type, but is being used as a value here.
@@ -115,85 +114,75 @@ mutableArr = readOnlyArr; // error: The type 'readonly string[]' is 'readonly' a
 
 //### Tuple
 
-// Allows you to express an Array with a fixed number of elements of different types whole types are known.
-// It's a sort of Array type that knows exactly how many elements it contains, and exactly which types it contains at specific indexes.
-// Like in Array, square brackets are used in the declaration, and to access elements by index.
-// Allows us to store multiple fields (properties) of different types. Tuples are typically used when we need to temporarily associate two normally unrelated properties.
-// Similar to structure in PB or record in Oracle, but the fields don't have names (only positions).
-// If you need to access the fields by name, use an object instead of a Tuple.
-let myTuple [number, string]; // declaration without initialization
-let myTuple [number, string] = [10, "Hello"]; // declaration with initialization
-let myTuple = [10, "Hello"]; // declaration with initialization; types are deferred
+// Tuple is a subtype of Array.
+// It allows fixed-length arrays to be typed, where the values at each index have specific known types, not necesserily the same.
+// So, it's a sort of Array that knows exactly how many elements it contains, and exactly which types it contains at specific indexes.
+// In contast to objects, fields don't have names (only positions). If you need to access the fields by name, use an object instead of a Tuple.
+// Tuples are typically used when we need to pass normally unrelated values together.
+
+// Like in Array, square brackets are used in the declaration, and to access elements by index:
+
+// Declaration without initialization:
+let myTuple [number, string];
+myTuple = [10, "Hello"];
+
+// Declaration with initialization:
+let myTuple [number, string] = [10, "Hello"]; 
+
+// Accessing elements:
 console.log(mytuple[0]) // 10
 console.log(mytuple[1]) // "Hello"
+myTuple[0] = 30;
+myTuple[1] = "Hi";
+
+// To declare a Tuple, you MUST explicitly describe its shape.
+// Unlike most other types, the properties' types cannot be inferred from the default value.
+// You can think the next example declares a tuple of type [number, string], but it decalares an Array of type (number | string)[]:
+let myTuple = [10, "Hello"];
+
 // You can also declare an empty tuple and choose to initialize it later:
 let mytuple = [];
 mytuple[0] = 120
 mytuple[1] = 234
-// Each property has an associated type. When using a tuple, each of these properties must be specified:
-let tupleType: [string, boolean]; // declaration without initialization; since types cannot be deferred, we must list them
-tupleType = ["test", false];
-tupleType = ["test"]; // Error: Type '[string]' is not assignable to type '[string, boolean]'
-tupleType = [false, "test"]; // Error: The values ​​passed do not match the types by position
+
 // Extract valueas from a tuple into standalone vars:
 let t = [10, "hello"]
 let [a, b] = t // declare two vars (string & boolean) and init them from the tuple; that compiles in this JavaScript: var a = t[0], c = t[1];
 console.log(a); // 10
 console.log(b); // "hello"
-// Like function signatures, there can also be optional tuple elements. This is achieved using the ? symbol in the tuple definition:
+
+// There can also be optional tuple elements. This is achieved using the ? symbol in the tuple definition:
 let optionalTuple: [string, boolean?];
 optionalTuple = ["test2", true];
 console.log(optionalTuple); // test2,true
 optionalTuple = ["test"];
 console.log(optionalTuple); // test
-// -----------
-type RestTupleType = [number, ...string[]]; // кортеж с первым свойством числа, а затем с переменным числом строк
+
+// The last property of a tuple can be declared with the rest operator. Note the square brackets after the property name:
+type RestTupleType = [number, ...string[]]; // a tuple with the first property being a number and then a variable number of strings
+let restTuple: RestTupleType = [1];
+let restTuple: RestTupleType = [1, "string1"];
+let restTuple: RestTupleType = [1, "string1", "string2"];
 let restTuple: RestTupleType = [1, "string1", "string2", "string3"];
-// Updating tuples:
-// Tuples are mutable, meaning you can update or change the values ​​of the tuple's elements:
-var mytuple = [10, "Hello", "World", "typeScript"];
-mytuple[0] = 121
+
+// When populating a tuple, each of the properties (except those declared with ? or ...) must be specified:
+myTuple = [20]; // Error: Type '[number]' is not assignable to type ['number, string]'
+myTuple = ["Hi", 30]; // Error: The values ​​passed do not match the types by position
+
 // Function, returning a tuple:
 function GetFullName(empId: number): [string, string] {
 	// ...populate fName & lName...
 	return [fName, lName];
 }
-let fullName = GetFullName(12345);
+let fullName = GetFullName(12345); // the type of fullName is inferred as [string, string]
 console.log(fullName[0] + " " + fullName[1]);
-// You can do the same without a tuple - using a dynamic type (this method is better since the fields are accessed by name rather than by index):
+// However, it's better to return multiple values using an inline object where the fields are accessed by name rather than by index:
 function GetFullName(empId: number): {firstName: string, lastName: string} {
 	// ...populate fName & lName...
 	return {firstName: fName, lastName: lName};
 }
-let fullName = GetFullName(12345);
+let fullName = GetFullName(12345); // the type of fullName is inferred as {firstName: string, lastName: string}
 console.log(fullName.firstName + " " + fullName.lastName);
-
-// Tuples are subtypes of array.
-// They allow fixed-length arrays to be typed, where the values ​​of each index have specific known types.
-// Unlike most other types, tuples must be explicitly typed when they are declared.
-// Tuple [firstname, lastname, year of birth]:
-let b: [string, string, number] = ['malcolm', 'gladwell', 1963]
-b = ['queen', 'elizabeth', 'ii', 1926] // Ошибка: тип 'string' не может быть присвоен типу 'number'
-// The next line decalares an Array of type string | number, not a Tuple:
-let a = ['London', '11:35', 17]
-// To declare a Tuple, explicitly describe its shape:
-let a: [string, string, number] = ['London', '11:35', 17]
-
-// Tuples support optional elements.
-// As with object types, optionality is indicated by the ? sign. An array of train fares that may vary depending on the direction:
-let trainFares: [number, number?][] = [
-	[3.75],
-	[8.25, 7.70],
-	[10.50]
-]
-// Equivalent to:
-let moreTrainFares: ([number] | [number, number])[] = [
-	// ...
-]
-// List of strings with at least one element
-let friends: [string, ...string[]] = ['Sara', 'Tali', 'Chloe', 'Claire']
-// Heterogeneous list
-let list: [number, boolean, ...string[]] = [1, false, 'a', 'b', 'c']
 
 // @@@ readonly Tuple Types
 // Tuple types have readonly variants, and can be specified by sticking a readonly modifier in front of them - just like with array shorthand syntax.
@@ -233,14 +222,15 @@ enum DoorStateString {Open = "open", Closed = "closed", Ajar = "ajar"}
 // What happens if we access the enum using array-like syntax:
 var ajarDoor = DoorState[2]; // same as DoorState["2"]
 console.log('ajarDoor is : ${ajarDoor}'); // ajarDoor is : Ajar
-// You might have expected the result to be just 2, but here we get the string Ajar, which is a string representation of our original enum value. This is actually a neat little trick that allows us to access the string representation instead of a simple number.
+// You might have expected the result to be just 2, but here we get the string Ajar, which is a string representation of our original enum value.
+// This is actually a neat little trick that allows us to access the string representation instead of a simple number.
 
 enum Language {
 	English,
 	Spanish,
-	Russian
+	French
 }
-let myFirstLanguage = Language.Russian // Language; same as Language[2]
+let myFirstLanguage = Language.French // Language; same as Language[2]
 let mySecondLanguage = Language['English'] // Language
 let a = Language.Tagalog // Error: Property 'Tagalog' does not exist on type 'typeof Language'
 let b = Language[3] // Language. Success!!! :-( To prevent reading of unexisting entry, use const - it prohibits reading by index at all:
@@ -248,7 +238,7 @@ let b = Language[3] // Language. Success!!! :-( To prevent reading of unexisting
 const enum Language {
 	English,
 	Spanish,
-	Russian
+	French
 }
 let c = Language[0] // Error: A constant enum member can only be accessed with a string literal
 
@@ -256,7 +246,7 @@ let c = Language[0] // Error: A constant enum member can only be accessed with a
 const enum Language {
 	English = 'en',
 	Spanish = 'sp',
-	Russian = 'ru'
+	French = 'fr'
 }
 
 //### Map
@@ -275,7 +265,7 @@ console.log(map.has('two')); // Output: true - Checking if a key exists
 map.delete('two'); // removing a key-value pair
 console.log(map.size); // Output: 2 - Checking the size of the Map
 
-// Iterating over the Map
+// Iterating over a Map:
 map.forEach((value, key) => {
   console.log(`${key}: ${value}`);
 });
@@ -283,7 +273,7 @@ map.forEach((value, key) => {
 // one: 1
 // three: 3
 
-// A Map with string keys and any values
+// A Map with string keys and any values:
 let userProfiles: Map<string, { age: number; city: string }> = new Map();
 
 userProfiles.set('Alice', { age: 30, city: 'New York' });
@@ -297,7 +287,7 @@ if (userProfiles.has('Bob')) {
 }
 
 userProfiles.set('Alice', { age: 31, city: 'New York' }); // updating a value
-userProfiles.delete('Charlie'); // Deleting an entry
+userProfiles.delete('Charlie'); // deleting an entry
 
 for (let [key, value] of userProfiles) {
   console.log(`${key}: Age - ${value.age}, City - ${value.city}`);

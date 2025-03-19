@@ -8,7 +8,7 @@ incompleteType = {id : 1}; // Error: Type '{ id: number; }' is not assignable to
 // Interface definitions can also include optional properties:
 interface IOptionalProp {id: number; name?: string;}
 let idAndName: IOptionalProp = {id: 2, name: "idAndName"};
-let idOnly: IOptionalProp = {id: 1};
+let idOnly: IOptionalProp = {id: 1}; // no error
 idAndName = idOnly;
 
 // Type inference with the in operator:
@@ -39,8 +39,8 @@ type Cake = Food & {
 // Almost identically, you can do the same with interfaces:
 interface Food {
 	calories: number;
-		tasty: boolean;
-	}
+	tasty: boolean;
+}
 interface Sushi extends Food {
 	salty: boolean;
 }
@@ -66,7 +66,7 @@ let vasya: User = {
 // @@@ Differences Between Type Aliases and Interfaces
 // Type aliases and interfaces are very similar, and in many cases you can choose between them freely.
 // Almost all features of an interface are available in type, the key distinction is that a type cannot be re-opened to add new properties
-// vs an interface which is always extendable.
+// 		vs an interface which is always extendable.
 
 // Extending an interface (using inheritance):
 
@@ -105,7 +105,7 @@ interface Window {
 interface Window {
   ts: TypeScriptAPI;
 }
-// Now Window contains 2 fields
+// Now Window contains 2 fields.
 
 // A type cannot be changed after being created:
 

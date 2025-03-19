@@ -1,6 +1,6 @@
 // ### Acess modifiers
 
-// public - Accessible from anywhere. This is the default access level.
+// public - Accessible from anywhere.
 // private - Accessible only from instances of a specific class.
 // protected - Accessible only from instances of a specific class and its subclasses.
 
@@ -45,7 +45,7 @@ class Person {
 }
 // Note that the field needs to be initialized in the constructor itself.
 // TypeScript does not analyze methods you invoke from the constructor to detect initializations, because a derived class
-// might override those methods and fail to initialize the members.
+//    might override those methods and fail to initialize the members.
 
 // Solutions to satisfy strictPropertyInitialization:
 // 1. Initialize the Property Directly:
@@ -157,11 +157,9 @@ class Derived2 extends Base {
 
 // TypeScript offers special syntax for turning a constructor parameter into a class property with the same name and value.
 // Parameter properties are created by prefixing a constructor argument with one of the visibility modifiers public, private, protected, or readonly.
-// The resulting field gets those modifier(s):
+//      and automatically populated with the values passed.
 
-// A TypeScript specific extension to classes which automatically set an instance field to the input parameter.
 // Parameter properties allow you to define and initialize properties directly in the constructor parameters.
-// They are declared as the constructor's parameters, so they are automatically populated with the values passed.
 // This feature helps reduce boilerplate code when you need to initialize class properties with values passed to the constructor.
 
 class Person {
@@ -212,7 +210,6 @@ console.log('id property is set to ${classWithAccessors.id}'); // the getter is 
 //		If the type of the setter parameter is not specified, it is inferred from the return type of the getter
 //		Getters and setters must have the same Member Visibility (both public/protected/private).
 
-
 //### Fake final classes
 
 // Although TypeScript does not support the final keyword for classes and methods, it can be easily faked.
@@ -223,17 +220,14 @@ class MessageQueue {
 // When a constructor is marked as private, you cannot use new in the class or extend it:
 class BadQueue extends MessageQueue {} // Error: Cannot extend class 'MessageQueue'. The class constructor is marked as private.
 new MessageQueue([]) // Error: The constructor of class 'MessageQueue' is private and accessible only within the class declaration.
-// In addition to preventing the class from being extended (which is what we want), private constructors also prevent the class from being instantiated directly (which is not what we want).
-// How can we keep the first restriction and get rid of the second? Easy:
+// In addition to preventing the class from being extended, private constructors also prevent the class from being instantiated directly (which is not what we want).
+// To enable creation of instances of your class, add a factory function:
 class MessageQueue {
 	private constructor(private messages: string[]) {}
 	static getInstance(messages: string[]) {
 		return new MessageQueue(messages)
 	}
 }
-// To prohibit creation on instances of the class, make its construnctor:
-//		private (so, the class must provide a factory method which returns an instance of it), or
-//		protected (so, only instances of its descendants can be instantiated, which have public constructors).
 
 //### Abstract classes and abstract methods
 
@@ -270,13 +264,13 @@ cat.move();      // Output: Roaming the earth...
 
 //### Inheritance:
 
-// Function in descendand overrides the function with the same sugnature in the ancestor - in the same way as in PB.
+// Function in descendand overrides the function with the same sugnature in the ancestor.
 // The "super" keyword can be used in the descentant to call the overridden version.
 
 //### Polymorphism
 
 // In TypeScript (as well as in JavaScript), if an overridden method in a derived class instance is called through a base class reference,
-// the version of the method defined in the derived class will be called.
+//    the version of the method defined in the derived class will be called.
 // This is due to the way JavaScript handles method dispatch at runtime, which is based on the actual type of the object, not the type of the reference.
 // So, the method that gets executed depends on the actual type of the object (the runtime type), not the type of the reference (the compile-time type):
 class Animal {
@@ -338,9 +332,9 @@ console.log(Counter.getCount()); // Output: 2; static methods can be called on t
 
 // @@@ static block in class (static initializer)
 // It's a feature introduced in ECMAScript 2022 (ES13) and supported by TypeScript.
-// The static initializer executes immediately when the class is loaded (i.e. accessesed for the first time)
+// The static initializer executes immediately when the class is loaded (i.e. accessesed for the first time).
 // Static blocks are useful for performing setup tasks, initializing static properties, or executing code
-// that needs to run before any instances of the class are created.
+//    that needs to run before any instances of the class are created.
 class MyClass {
   static count: number;
   static description: string;
@@ -365,4 +359,3 @@ console.log(MyClass.getCount()); // Output: 2
 // Unlike some other programming languages (like C#), TypeScript does not have the concept of static classes.
 // A static class is a class that cannot be instantiated and is used to group related static methods and properties.
 // To mimic it in TypeScript, just create a regular class with all vars & methods static, and a private constructor with no factory method.
-
