@@ -77,13 +77,12 @@ console.log('myVar : ${myVar!}'); // when the variable is actually used
 let myVar!: string; // no default value, but with definite assignment assertion
 setMyVar(); // it populates myVar in another scope but the current scope doesn't know that
 console.log('myVar : ${myVar}'); // no compile-time error; without ! you would get "Variable 'myVar' is used before being assigned"
-function setGlobalString() {
-	myVar = "this has been set";
-}
 
 // Class Properties:
+// As you will read in https://github.com/Ursego/TypeScriptCourse/blob/main/10%20OOP%20-%20Class.ts, a property must be populated either on initialization
+//    or within the constructor (but not in a function called from the constructor). The definite assignment assertion allows to overcome that:
 class Person {
-  name!: string; // no default value, but with definite assignment assertion
+  name!: string; // no default value and not initialized within the constructor, but with definite assignment assertion
   constructor() { this.initialize(); }
   initialize() { this.name = "Alice"; } // now, name is assigned a value
   greet() {
@@ -99,9 +98,8 @@ class Person {
 let myVar: string; // neither default value nor !
 setMyVar(); // it populates myVar in another scope but the current scope doesn't know that
 console.log('myVar : ${myVar!}'); // no compile-time error; without ! you would get "Variable 'myVar' is used before being assigned"
-function setGlobalString() {
-	myVar = "this has been set";
-}
+
+// The same method would work in class Person if you move the ! from the declaration of "name" to its consuming by console.log.
 
 // However, all these appoaches are dangerous since they can hide bugs.
 // They can cause runtime errors if the variable is indeed uninitialized, but may not be caught on testing in some specific branches of logic.

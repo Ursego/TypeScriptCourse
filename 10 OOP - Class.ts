@@ -55,13 +55,15 @@ name: string = "Default Name";
     this.name = name; // <<<<<<<<<<<<<<
     this.age = age;
   }
-// 3. Use Definite Assignment Assertion:
+// 3. Use Definite Assignment Assertion (!):
 //		Use it if you intend to definitely initialize a field through means other than the constructor (for example, maybe in a function called from the constructor):
-name!: string;
+name!: string; // when declaring the field, or
+console.log('name : ${name!}'); // when the field is actually used
+// For more details, see https://github.com/Ursego/TypeScriptCourse/blob/main/07%20Variables.ts >>> "### Definite Assignment Assertion (!)"
 // 4. Optional value (declare the property with a union type that includes undefined):
 // 		By adding a union of types here, we make a conscious decision that the id property may be undefined:
 name: string | undefined;
-// 5. Optional property:
+// 5. Optional property (?):
 name?: string;
 
 // Notice that in #4 the property always exists (and is allowed to be empty) while in #5 the property can exist or not.
