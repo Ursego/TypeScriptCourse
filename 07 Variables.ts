@@ -17,42 +17,33 @@
 // 		Immutable Binding: A const variable cannot be reassigned. However, if the const variable is an object or array, its properties or elements can be modified.
 // 		Its value can only be set after the variable is defined and cannot be changed subsequently.
 
+// ### Using a variable before it is declared
+
 // var:
-// We can use a variable before it is defined.
+// We can use the variable before it is declared.
 // If the runtime encounters a variable that has not been defined or assigned a value before, then the value of that variable will be undefined:
-console.log('anyValue = ${anyValue}'); // anyValue = undefined; since anyValue doesn't exist, this line creates it
-var anyValue = 2; // redefine anyValue (create another var with the same name which replaces the existing one)
+console.log('lValue = ${lValue}'); // lValue = undefined; since lValue doesn't exist, this line creates it
+var lValue = 2; // redefine lValue (create another var with the same name which replaces the existing one)
 // When using the var keyword, there is no check to see if the variable itself has been defined before we actually use it.
-// This can lead to undesirable behavior.
+// This can lead to heavy errors.
 
 // let:
-// One of the advantages of using the let keyword is that we cannot use the variable name before it is defined:
+// We cannot use the variable before it is declared. That is a huge advantages of the let keyword!
 console.log('letValue = ${lValue}'); // Error: Block-scoped variable 'lValue' used before its declaration
 let lValue = 2;
+
+// ### Scope:
+
 // Variables defined with let have block-level scope:
 let lValue = 2;
 console.log('lValue = ${lValue}'); // "lValue = 2"
 if (lValue == 2) {
-	let lValue = 2001;
-	console.log('block scoped lValue : ${lValue}'); // "block scoped lValue : 2001"
+  // Create a new, independent variable with the same name which shadows (makes unavailable) the oreviously declared variable.
+  // If lValue had been declared with var, the next line would have modified the previously declared variable rather than creating a new one:
+	let lValue = 333;
+	console.log('block scoped lValue: ${lValue}'); // "within a block: lValue = 333"
 }
-console.log('lValue = ${lValue}'); // "lValue = 2"
-
-// However, in some cases we would like to declare a variable with the let keyword and use it before TypeScript decides that it is defined:
-let globalString: string;
-setGlobalString();
-console.log('globalString : ${globalString}'); // Error: Variable 'globalString' is used before being assigned
-function setGlobalString() {
-	globalString = "this has been set";
-}
-
-// We can use the assert assignment syntax, which is to add an exclamation mark (!) after a variable that has already been assigned.
-// There are two places we can do this to make our code compile. First, when declaring the variable:
-let globalString!: string;
-// This tells the compiler that we are asserting that the variable has been assigned, and that it should not raise an error if it thinks it was used before the assignment.
-
-// The second place we can use an assert assignment is where the variable is actually used:
-console.log('globalString : ${globalString!}');
+console.log('lValue = ${lValue}'); // "lValue = 2"; if lValue was declared with var, the output would be "lValue = 333"
 
 // ### Reading from unititialized variables generates an error
 
@@ -69,65 +60,84 @@ class Person {
   }
 }
 
-// ### The definite assignment assertion (! in a variable or property declaration)
+// ### Definite Assignment Assertion (!)
 
-// Indicates that a variable or property will definitely be assigned a value, even if TypeScript can't infer it from the code - you, as the developer, guarantee that.
+// In some cases we would like to declare a variable with the let keyword, populate it in another scope and use without TypeScript deciding that it's not populated.
+// For that, we can use the assert assignment syntax, which is to add an exclamation mark (!) after a variable.
+// ! indicates that the variable will definitely be assigned a value before it's read in the current scope first time, even if TypeScript can't infer it from the code.
+// You, as the developer, guarantee that, so the compiler should not raise an error if it thinks the variable is used unassigned.
 
-// Standalone Variables:
-let myVar!: number; // still no default value, but with definite assignment assertion
-let anotherVar = myVar; // no compile-time error
+// There are two places we can do this to make our code compile:
+let myVar!: string; // when declaring the variable
+console.log('myVar : ${myVar!}'); // when the variable is actually used
+
+// @@@ ! when declaring the variable:
+
+// Standalone Variable:
+let myVar!: string; // no default value, but with definite assignment assertion
+setMyVar(); // it populates myVar in another scope but the current scope doesn't know that
+console.log('myVar : ${myVar}'); // no compile-time error; without ! you would get "Variable 'myVar' is used before being assigned"
+function setGlobalString() {
+	myVar = "this has been set";
+}
 
 // Class Properties:
 class Person {
-  name!: string; // still no default value, but with definite assignment assertion
+  name!: string; // no default value, but with definite assignment assertion
   constructor() { this.initialize(); }
-  initialize() { this.name = "Alice"; }  // now, name is assigned a value
+  initialize() { this.name = "Alice"; } // now, name is assigned a value
   greet() {
     console.log('Hello, my name is ${this.name}'); // no compile-time error
   }
 }
 
-// ### The non-null assertion operator (! when reading from a variable)
+// @@@ ! when the variable is actually used
 
-// If a variable or property is declared WITHOUT definite assignment assertion, you can use the non-null assertion (!)
-// when READING FROM it if you are confident that it will be assigned a value before use:
+// If a variable or property is declared WITHOUT definite assignment assertion, you can use the non-null assertion operator
+//    when READING FROM it if you are confident that it will be assigned a value before use:
 
-// Standalone Variables:
-let myVar: number; // no default value, no !
-let anotherVar = myVar!; // accessed with ! - no compile-time error, but a run-rime error
-
-// Class Properties:
-class Person {
-  name: string; // no default value, no !
-  constructor() { } // this.name is not assigned a value here
-  greet() {
-    console.log('Hello, my name is ${this.name!}'); // accessed with ! - no compile-time error, but a run-rime error
-  }
-}
-
-// Another example:
-function liveDangerously(x?: number | undefined) {
-	console.log(x!.toFixed()); // no error
+let myVar: string; // neither default value nor !
+setMyVar(); // it populates myVar in another scope but the current scope doesn't know that
+console.log('myVar : ${myVar!}'); // no compile-time error; without ! you would get "Variable 'myVar' is used before being assigned"
+function setGlobalString() {
+	myVar = "this has been set";
 }
 
 // However, all these appoaches are dangerous since they can hide bugs.
-// They can lead to runtime errors if the variable is indeed uninitialized, but may not be caught on testing in some specific branches of logic.
-// You do want this error if the var is supposed to be populated when read from, so do you best NOT to use ! (in both declaring and reading from the var).
+// They can cause runtime errors if the variable is indeed uninitialized, but may not be caught on testing in some specific branches of logic.
+// You do want this error if the var is supposed to be populated when read from, so try NOT to use ! (in both declaring and reading from the var).
 // The only case when you have no choise it's when the var is populated not in the scope where it is declared and read from.
 
-//### Optional parameters and variables (?)
+// ### Optional Properties in Objects and Interfaces (?)
 
-// The question mark (?) is used to denote that a variable, parameter, or property is optional.
-// This means that the variable, parameter, or property can be provided or it can be omitted.
+// The question mark (?) is used to denote that the property (field) is optional. This means that the property can be provided or it can be omitted.
 
-// @@@ Optional Function Parameters
-// When a function parameter is declared with a question mark, it means that the parameter is optional and can be omitted when the function is called:
+// It is important to understand that we are not talking about the optionality of the property's value - this is achieved with a "| null" data type.
+// We are talking about whether the property exists at all (i.e. the memory is allocated for it).
+// It's fine if a field declared with ? will not exist. But if it will exist and it's defined without "| null", a value is not optional - it must be assigned.
+
+interface Person { // it's an "interface" but the example would be the same for "class"
+  name: string;
+  age?: number;
+}
+
+const alice: Person = {
+  name: "Alice",
+  age: 30
+};
+
+const bob: Person = { // no compilation error thanks to ? in "age"
+  name: "Bob"
+};
+
+console.log(alice); // Output: { name: 'Alice', age: 30 }
+console.log(bob); // Output: { name: 'Bob' } - the age property doesn't exist at all
+
+// ### Optional Function Parameters (?)
+
+// When a function parameter is declared with a question mark, that means that the parameter is optional and can be omitted when the function is called:
 function funct(age?: number) {
-  if (age !== undefined) {
-    console.log(`Age is ${age}`);
-  } else {
-    console.log("Age is not provided");
-  }
+  console.log(`Age is ${age !== undefined ? age : "not provided"}`);
 }
 
 funct(25); // Output: Age is 25
@@ -139,7 +149,7 @@ class Base {
 }
  
 class Derived extends Base {
-  greet(name?: string) {
+  greet(name?: string) { // does it overload or override greet()? hmmmm......
     if (name === undefined) {
       super.greet();
     } else {
@@ -152,27 +162,11 @@ d.greet();
 d.greet("reader");
 // You could think that greet(name?: string) in Derived doesn't override greet() in Base but overloads.
 // However, since "name" in Derived is optional (i.e. could be not provided at all), that also covers the greet() signature in Base, so it's an overriding.
+// This contradicts the strict definitions of overriding and overloading since these two functions have different signatures, which corresponds to overloading.
+// But such a solution makes practical sense.
 
-// @@@ Optional Properties in Interfaces
+// ### Optional Variables
 
-interface Person {
-  name: string;
-  age?: number;
-}
-
-const alice: Person = {
-  name: "Alice",
-  age: 30
-};
-
-const bob: Person = {
-  name: "Bob"
-};
-
-console.log(alice); // Output: { name: 'Alice', age: 30 }
-console.log(bob); // Output: { name: 'Bob' } - the age property doesn't exist at all
-
-// @@@ Optional Variables
 // The question mark is not used for standalone variable declarations.
 // Instead, you might use a union type with undefined to achieve a similar effect:
 let age: number | undefined;
