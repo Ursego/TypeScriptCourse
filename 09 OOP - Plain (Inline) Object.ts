@@ -80,6 +80,8 @@ paintShape({ shape, xPos: 100 });
 paintShape({ shape, yPos: 100 });
 paintShape({ shape, xPos: 100, yPos: 100 });
 
+// You will find more explanation of optional properties in https://github.com/Ursego/TypeScriptCourse/blob/main/10%20OOP%20-%20Class.ts.
+
 //### readonly properties
 // Properties can also be marked as readonly.
 // While it won’t change any behavior at runtime, a property marked as readonly can’t be written to during type-checking.
