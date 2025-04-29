@@ -1,14 +1,48 @@
-//### Anonymous functions:
+//### Anonymous functions
+
 // These are functions that are defined on the fly and do not specify a function name:
 const addFunction = function(a: number, b: number): number {
   return a + b;
   }
 let addFunctionResult = addFunction(2,3); // 5
 
-//### Optional parameters:
+//### Optional parameters without default values (?)
 
-// TypeScript uses the question mark syntax ? to indicate optional parameters.
-// Required parameters must come before optional ones. Any optional parameters must be the last parameters:
+// The question mark (?) is used to denote that the parameter is optional, i.e. can be omitted when the function is called.
+// It is important to understand that we are not talking about the optionality of the parameter's value - this is achieved with a "| null" or "| undefined" data type,
+//    or by declaring the parameter with a default value.
+// We are talking about whether the parameter exists at all (i.e. the memory is allocated for it).
+// It's fine if a parameter declared with ? will not be sent.
+// But if it will sent and it's defined without "| null", "| undefined" or a default value, its value is required - the caller must send it.
+
+function funct(age?: number) {
+  console.log(`Age is ${age !== undefined ? age : "not provided"}`);
+}
+
+funct(25); // Output: Age is 25
+funct();   // Output: Age is not provided
+
+// Notice this case:
+class Base {
+  greet() { ... }
+}
+ 
+class Derived extends Base {
+  greet(name?: string) { // does it overload or override greet()? hmmmm......
+    if (name === undefined) {
+      super.greet();
+    } else {
+      console.log(`Hello, ${name.toUpperCase()}`);
+    }
+  }
+}
+const d = new Derived();
+d.greet();
+d.greet("reader");
+// You could think that greet(name?: string) in Derived doesn't override greet() in Base but overloads.
+// However, since "name" in Derived is optional (i.e. could be not provided at all), that also covers the greet() signature in Base, so it's an overriding.
+
+// IMPORTANT! Any optional parameters (be them declared with ? or with a default value) must come last - after required ones:
 function concatStrings(a: string, b: string, c?: string) {
 	return a + b + c;
 }
@@ -16,19 +50,17 @@ let concat3strings = concatStrings("a", "b", "c"); // "abc"
 let concat2strings = concatStrings("a", "b"); // "ab"
 let concat1string = concatStrings("a"); // error: Expected 2-3 arguments, but got 1
 
-//### Default parameters:
+//### Optional parameters with default values:
 
-// TypeScript allows you to set optional parameters with default values.
-// Note that when we set 'c' to a default value, we:
-//		remove its optional ? annotation (obviously, a default value makes the parameter optional);
-//		don't specify the type (it's inferred from the default value):
+// TypeScript allows you to declare a parameter as optional by providing a default value:
 function concatStringsDefault(a: string, b: string, c = "c") {
 	return a + b + c;
 }
 let s1 = concatStringsDefault("a", "b"); // "abc"
 let s2 = concatStringsDefault("a", "b", "z"); // "abz"
-// Of course, you can also add explicit type annotations for default parameters in the same way as for regular parameters:
-c: string = "c"
+
+// Note that when we don't specify the type since it's inferred from the default value. However, you can specify it explicitly if you want:
+function concatStringsDefault(a: string, b: string, c: string = "c") { ... }
 
 //### JavaScript 'arguments' object in a function
 

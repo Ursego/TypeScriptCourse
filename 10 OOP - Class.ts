@@ -64,18 +64,32 @@ console.log('name : ${name!}'); // when the field is actually used
 // 		By adding a union of types here, we make a conscious decision that the id property may be undefined:
 name: string | undefined;
 // 5. Optional property (?):
-name?: string;
 
-// Notice that in #4 the property always exists (and is allowed to be empty) while in #5 the property can exist or not.
-// So, if ther property is optional (#5), it must be checked for existence before being used:
+//    The question mark (?) is used to denote that the property (field) is optional. This means that the property can be provided or it can be omitted.
+//    It is important to understand that we are not talking about the optionality of the property's value - this is achieved with a "| null" or "| undefined" data type.
+//    We are talking about whether the property exists at all (i.e. the memory is allocated for it).
+//    It's fine if a field declared with ? will not exist. But if it will exist and it's defined without "| null" or "| undefined", a value is not optional - it must be assigned.
+
+class Person {
+  name: string; // always exists and must be provided 
+  age?: number; // optional
+
   setName(name: string) {
-    if (this.name) { // make sure it exists
-      this.name = name;
+    this.name = name;
+  }
+
+  setAge(age: string) {
+    if (this.age) { // if the property is optional, it must be checked for existence before being used!
+      this.age = age;
     }
   }
-// Practical Usage:
-// 	Use name: string | undefined when you want to ensure that the property is always present on the object, even if it might not have a meaningful value initially.
-// 	Use name?: string when defining properties in interfaces or classes where the property may not always be provided or initialized.
+}
+
+const alice: Person = { name: "Alice", age: 30 };
+const bob: Person = { name: "Bob" }; // no compilation error thanks to ? in "age"
+
+console.log(alice); // Output: { name: 'Alice', age: 30 }
+console.log(bob); // Output: { name: 'Bob' } - it doesn't print "age: undefined" since the age property doesn't exist at all
 
 //### 'private' keyword vs. using the # syntax for private fields
 
