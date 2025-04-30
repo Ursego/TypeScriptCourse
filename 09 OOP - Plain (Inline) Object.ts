@@ -3,8 +3,8 @@
 
 //### Inline Objects
 
-// In TypeScript, objects created inline refer to object literals that are defined directly in the code, without being instances of a class.
-// These object literals are a common way to define and use data structures on the fly.
+// An inline object refers to an object literal defined directly at the point of use (variable, parameter or function's return type).
+// It is not an instance of a pre-defined named type or interface.
 
 // An inline object in TypeScript is defined using curly braces {} and consists of key-value pairs.
 // The keys are typically strings (but can also be symbols), and the values can be of any type, including other objects, arrays, functions, etc.
@@ -25,15 +25,52 @@ let person = {
   }
 };
 
-console.log(person.name); // Output: Alice
-console.log(person.hobbies[1]); // Output: traveling
-person.greet(); // Output: Hello!
+console.log(person.name); // output: Alice
+console.log(person.hobbies[1]); // output: traveling
+person.greet(); // output: Hello!
 
-// Type Annotations for Inline Objects
-// You can provide type annotations to ensure that the inline objects conform to a specific structure.
+// Inline objects are a bad practice which compromises type safety in several important ways, despite appearing fully typed at first glance.
+
+// #1
+// Loss of Semantic Meaning:
+// With inline types - what exactly is this object?
+function process(data: { id: string; values: number[] }) { /* ... */ }
+// With named types - clear meaning (named types serve as documentation and make your code's intent more apparent):
+function process(data: AnalyticsReport) { /* ... */ }
+
+// #2:
+// Confusing structurally identical entities:
+// TypeScript uses structural typing, which means objects are compatible if they have the same structure, regardless of their declared type name.
+// With inline object types, you lose the nominal type information that helps distinguish between structurally identical but semantically different objects:
+function processUser({ id: string, name: string }) { /* ... */ }
+function processProduct({ id: string, name: string }) { /* ... */ }
+
+// #3:
+// Refactoring:
+// When you need to refactor, inline types require changes across many files, with a high risk of forgetting to change all the spots and getting runtime errors.
+// Named types let you change the definition in one place and get compilation errors if you forogot to update some spots.
+
+// #4:
+// Hidden Type Duplication:
+// Inline types can introduce unnoticed type duplication across your codebase, making it harder to maintain a single source of truth for your domain models.
+// When types evolve in different places independently, they can diverge subtly, causing runtime errors that are hard to trace.
+
+// #5:
+// TypeScript generates less helpful error messages with inline types:
+
+// With inline types:
+// Error: Type '{ id: string; name: string; active: boolean; }' is not assignable to type '{ id: string; name: string; }'.
+// Property 'active' does not exist in type '{ id: string; name: string; }'
+
+// With named types, thee error is clearer about which conceptual types are incompatible.:
+// Error: Type 'AdminUser' is not assignable to type 'BasicUser'.
+// Property 'active' does not exist in type 'BasicUser'.
+
+// To resolve all the listed issues, you can provide type annotations to ensure that the objects conform to a specific structure. So, the object is not "inline" anymore.
 // Interfaces or type aliases can be used to define the structure of inline objects, ensuring type safety.
+// The next example uses interface but the result would be the same if instead of 'interface' we would write 'type'
+// 'interface' and 'type' will be decribed later. For now, think of them as something that enforces the shape of the object you are creating:
 
-// Using an Interface:
 interface Address {
   street: string;
   city: string;
@@ -63,102 +100,27 @@ let person: Person = { // <<<<<<< person must be of type Person
     console.log("Hello!");
   }
 };
-// The result would be the same if instead of 'interface' we would write 'type'.
 
-//### Optional properties
-// Much of the time, we’ll find ourselves dealing with objects that might have a property set.
-// In those cases, we can mark those properties as optional by adding a question mark (?) to the end of their names.
-interface PaintOptions {
-  shape: Shape;
-  xPos?: number;
-  yPos?: number;
-}
-function paintShape(opts: PaintOptions) { ... }
-const shape = getShape();
-paintShape({ shape });
-paintShape({ shape, xPos: 100 });
-paintShape({ shape, yPos: 100 });
-paintShape({ shape, xPos: 100, yPos: 100 });
+// ----------------------------------------------------------------------------
+// The following concepts apply not only to inline objects, but to any objects.
+// ----------------------------------------------------------------------------
 
-// You will find more explanation of optional properties in https://github.com/Ursego/TypeScriptCourse/blob/main/10%20OOP%20-%20Class.ts.
+//### Accessing properties using the bracket notation
 
-//### readonly properties
-// Properties can also be marked as readonly.
-// While it won’t change any behavior at runtime, a property marked as readonly can’t be written to during type-checking.
-interface SomeType {
-  readonly prop: string = "Hi!";
-}
- 
-function doSomething(obj: SomeType) {
-  console.log(`prop has the value '${obj.prop}'.`);
-  obj.prop = "hello"; // error: Cannot assign to 'prop' because it is a read-only property.
-}
-// Using the readonly modifier doesn’t necessarily imply that a value is totally immutable - or in other words, that its internal contents can’t be changed.
-// It just means the property itself can’t be re-written to:
-interface Home {
-  readonly resident: { name: string; age: number };
-}
-function visitForBirthday(home: Home) {
-  // We can read and update properties from 'home.resident'.
-  console.log(`Happy birthday ${home.resident.name}!`);
-  home.resident.name = "John"; // success - we don't change resident, we chage its property
-  home.resident.age = 49; // success - we don't change resident, we chage its property
-  home.resident = { name: "John"; age: 49 } // error: Cannot assign to 'prop' because it is a read-only property.
+// Let's consider this simple object:
+let worker = { //
+	id: 1,
+	name: "test"
 }
 
-//### Accessing properties:
-// When working with TypeScript objects, it is quite common to define them using property names that are strings, as seen in the code below:
-let normalObject = { // the normal way
-	id : 1,
-	name : "test" }
-let stringObject = { // properties names are strings!
-	"testProperty": 1,
-	"anotherProperty": "this is a string"
-}
- // We can access these string properties in two ways:
-let testProperty = stringObject.testProperty; // the normal way
-let testStringProperty = stringObject["testProperty"]; // the Map-like syntax
+// We can access its properties in two ways. The most common way is the dot notation:
+let id = worker.id;
+let name = worker.name;
 
-//### Extending Types
-
-interface BasicAddress {
-  name?: string;
-  street: string;
-  city: string;
-  country: string;
-  postalCode: string;
-}
- 
-interface AddressWithUnit extends BasicAddress {
-  unit: string;
-}
-
-// interfaces can also extend from multiple types:
-
-interface Colorful {
-  color: string;
-}
-interface Circle {
-  radius: number;
-}
-interface ColorfulCircle extends Colorful, Circle {}
-const cc: ColorfulCircle = {
-  color: "red",
-  radius: 42,
-};
-
-// Intersection Types (for type aliases)
-// interfaces allowed us to build up new types from other types by extending them.
-// TypeScript provides another construct called intersection types that is mainly used to combine existing object types.
-// An intersection type is defined using the & operator.
-
-interface Colorful {
-  color: string;
-}
-interface Circle {
-  radius: number;
-}
-type ColorfulCircle = Colorful & Circle;
+// However, we can also use the bracket notation, or the Map-like syntax:
+let id = worker["id"];
+let name = worker["name"];
+// The bracket notation allows to built the property name dynamically, which can improve your code in some situations.
 
 //### ... as the SPREAD operator
 

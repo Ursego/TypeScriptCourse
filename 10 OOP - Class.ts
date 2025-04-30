@@ -25,8 +25,8 @@ g.name = "John"; // error: Cannot assign to 'name' because it is a read-only pro
 
 //### strictPropertyInitialization
 
-// Requires that all instance properties be initialized (on declarion or in the constructor) or have a definite assignment assertion. 
-// You need to set it to true in your tsconfig.json file.
+// Requires that all instance properties be initialized (on declarion or in the constructor) or have a definite assignment assertion (will be explained soon). 
+// You need to set strictPropertyInitialization to true in your tsconfig.json file.
 // It is often enabled as part of the strict option, which turns on several strict type-checking options at once.
 {
   "compilerOptions": {
