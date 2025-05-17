@@ -1,91 +1,93 @@
-//### Array:
 
-var arrayOfNumbers: number[] = [1,2,3];
+// ######################################################################################################
+// Array:
+// ######################################################################################################
+
+// @@@ Array declaration syntax
+
+// TypeScript supports two syntaxes for arrays: T[] and Array<T>:
+let numbers1: number[] = [1, 2, 3];
+let numbers2: Array<number> = [1, 2, 3];
+// These two declarations are functionally equivalent - number[] is really just a shorthand for Array<number>.
+// The T[] syntax is more concise and commonly used, while the Array<T> syntax follows the generic type convention and may be preferred in some complex type scenarios.
+
+let arrayOfNumbers: number[] = [1,2,3];
 arrayOfNumbers = [3,4,5,6,7,8,9]; // we can assign any number of elements to an array as long as each element is of the correct type
 console.log('arrayOfNumbers: ${arrayOfNumbers}'); // arrayOfNumbers: 3,4,5,6,7,8,9
-arrayOfNumbers = ["1", "2", "3"]; // Error: Type 'string[]' is not assignable to type 'number[]'
 
-var arrayOfStrings : string[] = ["first", "second", "third"];
-for (var i = 0; i < arrayOfStrings.length; i++) {
-	console.log('arrayOfStrings[${i}] = ${arrayOfStrings[i]}');
-}
-// We access an array element using the arrayOfStrings[i] syntax. The output of this code looks like this:
-arrayOfStrings[0] = first
-arrayOfStrings[1] = second
-arrayOfStrings[2] = third
+// @@@ Array type inference
 
-// ES6 syntax. Note that the value of the itemKey variable will iterate over the keys of the array, not the array elements themselves:
-for(var itemKey in arrayOfStrings) {
-	var itemValue = arrayOfStrings[itemKey];
-	console.log('arrayOfStrings[${itemKey}] = ${itemValue}');
-}
+let a = [1, 2, 3]; // number[]
+a = ['1', '2', '3']; // Error: Type 'string' is not assignable to type 'number'.
+let b = ['a', 'b']; // string[]
+let c = [1, 'a']; // (number | string)[]
+let d = [1, 'a', true]; // (number | string | boolean)[]
 
-// To iterate over the values ​​contained in the array, use the "for ... of ..."" syntax:
-for(var value of arrayOfStrings) {
-	console.log('arrayItem = ${value}');
-}
+// When the initial value is [] (an empty Array), TypeScript doesn't know what type its elements will be, and assigns it the 'any' type:
+let a = [];
+// That is identical to
+let a: any[];
 
-// TypeScript supports two syntaxes for arrays: T[] and Array<T>. They are identical in meaning and effect.
-
-let a = [1, 2, 3] // number[]
-var b = ['a', 'b'] // string[]
-let c: string[] = ['a'] // string[]
-let d = [1, 'a'] // (number | string)[]
-const e = [2, 'b'] // (number | string)[]
-
-let f = ['red']
-f.push('blue')
-f.push(true) // Error: argument of type 'true' cannot be assigned to parameter of type 'string'.
-
-let g = [] // any[]
-g.push(1) // number[]
-g.push('red') // (string | number)[]
-
-let h: number[] = [] // number[]
-h.push(1) // number[]
-h.push('red') // Error: Argument of type '"red"' cannot be assigned to parameter of type 'number'
-
-d.map(_ => {
-	if (typeof _ === 'number') {
-		return _ * 3
-	}
-	return _.toUpperCase()
-	}
-)
-
-// When you initialize an empty array, TypeScript doesn't know what type its elements will be, and assigns it the any type.
-// As you add new values ​​to the array, TypeScript incrementally infers its type based on them.
-// Once the array goes beyond a certain range (for example, if you declared it in a function and then returned it), then TypeScript assigns it the final type, which can't be extended any further:
+// Once the array, created as any[] and populated later, is returned from a function whose return type is not defined explicitly,
+// its return type is inferred from the last state of the Array before it's returned:
 function buildArray() {
-	let a = [] // any[]
-	a.push(1) // number[]
-	a.push('x') // (string | number)[]
-	return a
+	let a = []; // any[]
+	a.push('x');
+	a.push(1);
+	return a; // the function return type is inferred as (string | number)[] - not as any[]!
 }
-let myArray = buildArray() // (string | number)[]
-myArray.push(true) // Error: Argument of type 'true' cannot be assigned to parameter of type 'string|number'.
+let myArray = buildArray(); // (string | number)[]
+myArray.push(true); // Error: Argument of type 'true' cannot be assigned to parameter of type 'string|number'.
+// Of course, you must always define return types of functions explicitly to enjoy type safety (inferred return type can hide errors, especially if the function is complex).
 
-// Array is a generic type. Whenever we write out types like number[] or string[], that’s really just a shorthand for Array<number> and Array<string>.
-interface Array<Type> {
-  /**
-   * Gets or sets the length of the array.
-   */
-  length: number;
- 
-  /**
-   * Removes the last element from an array and returns it.
-   */
-  pop(): Type | undefined;
- 
-  /**
-   * Appends new elements to an array, and returns the new length of the array.
-   */
-  push(...items: Type[]): number;
- 
-  // ...
+// @@@ Looping over an Array
+
+let arrayOfStrings : string[] = ["first", "second", "third"];
+
+// The "for...of" syntax (most popular). The loop variable interates over the values of the array:
+for(let val of arrayOfStrings) {
+	console.log('array item = ${val}');
 }
 
-//### ReadonlyArray
+// The "for...in" syntax. The loop variable interates over the indexes of the array, not the values.
+// Use it only if you need the current index within the loop:
+for(let i in arrayOfStrings) {
+	let val = arrayOfStrings[i];
+	console.log('array item = ${val}');
+}
+
+// So, just remember: "in" iterates over indexes, "of" iterates over values.
+
+// The "old style" for loop. Try to avoid it - use one of the previous syntaxes instead:
+for (let i = 0; i < arrayOfStrings.length; i++) {
+	let val = arrayOfStrings[i];
+	console.log('array item = ${val}');
+}
+
+// @@@ A few ways to add an element to an Array
+
+// 1. Using index assignment:
+
+// To append an element to the end of the Array, assign it to the next available index. You have that index ready in the length property:
+let fruits = ["apple", "banana"];
+fruits[fruits.length] = "orange"; // ["apple", "banana", "orange"]
+
+// In JavaScript/TypeScript, arrays are sparse, meaning you can assign values at indexes beyond the current length.
+// The intermediate positions will be filled with undefined values:
+fruits[5] = "pear"; // ["apple", "banana", "orange", undefined, undefined, "pear"]
+// This feature can be used in counter arrays.
+
+// 2. Using push():
+fruits.push("grapefruit"); // ["apple", "banana", "orange", undefined, undefined, "pear", "grapefruit"]
+// This method is preferred over #1 even though the term is misused (in programming, the push operation is related to stack, not array)
+
+// 3. Using unshift() - that adds the element to the beginning:
+fruits.unshift("avocado"); // ["avocado", "apple", "banana", "orange", undefined, undefined, "pear", "grapefruit"]
+
+// ######################################################################################################
+// ReadonlyArray
+// ######################################################################################################
+
 // The ReadonlyArray is a special type that describes arrays that shouldn’t be changed.
 function doStuff(values: ReadonlyArray<string>) {
   // We can read from 'values'...
@@ -112,7 +114,9 @@ let mutableArr: string[] = [];
 readOnlyArr = mutableArr; // ok
 mutableArr = readOnlyArr; // error: The type 'readonly string[]' is 'readonly' and cannot be assigned to the mutable type 'string[]'.
 
-//### Tuple
+// ######################################################################################################
+// Tuple
+// ######################################################################################################
 
 // Tuple is a subtype of Array.
 // It allows fixed-length arrays to be typed, where the values at each index have specific known types, not necesserily the same.
@@ -147,7 +151,7 @@ mytuple[1] = 234
 
 // Extract valueas from a tuple into standalone vars:
 let t = [10, "hello"]
-let [a, b] = t // declare two vars (string & boolean) and init them from the tuple; that compiles in this JavaScript: var a = t[0], c = t[1];
+let [a, b] = t // declare two vars (string & boolean) and init them from the tuple; that compiles into this JavaScript: let a = t[0], c = t[1];
 console.log(a); // 10
 console.log(b); // "hello"
 
@@ -208,19 +212,21 @@ type C = Readonly<string[]> // readonly string[]
 type D = readonly [number, string] // readonly [number, string]
 type E = Readonly<[number, string]> // readonly [number, string]
 
-//### Enumeration:
+// ######################################################################################################
+// Enumeration:
+// ######################################################################################################
 
 enum DoorState {Open, Closed, Ajar}
 // In this example, the DoorState.Open enum value will be 0, the DoorState.Closed enum value will be 1, and the DoorState.Ajar enum value will be 2.
-var openDoor = DoorState.Open;
+let openDoor = DoorState.Open;
 console.log('openDoor is: ${openDoor}'); // openDoor is: 0
-var closedDoor = DoorState["Closed"]; // same as DoorState.Closed but the enum can be built dynamically
+let closedDoor = DoorState["Closed"]; // same as DoorState.Closed but the enum can be built dynamically
 console.log('closedDoor is : ${closedDoor}'); // openDoor is: 1
 // We can set the numeric value manually:
 enum DoorState {Open = 3, Closed = 7, Ajar = 10}
 enum DoorStateString {Open = "open", Closed = "closed", Ajar = "ajar"}
 // What happens if we access the enum using array-like syntax:
-var ajarDoor = DoorState[2]; // same as DoorState["2"]
+let ajarDoor = DoorState[2]; // same as DoorState["2"]
 console.log('ajarDoor is : ${ajarDoor}'); // ajarDoor is : Ajar
 // You might have expected the result to be just 2, but here we get the string Ajar, which is a string representation of our original enum value.
 // This is actually a neat little trick that allows us to access the string representation instead of a simple number.
@@ -249,7 +255,9 @@ const enum Language {
 	French = 'fr'
 }
 
-//### Map
+// ######################################################################################################
+// Map
+// ######################################################################################################
 
 // In TypeScript (and JavaScript), you cannot use dot notation or square bracket notation to directly access or set values in a Map object.
 // Instead, you must use the set and get methods provided by the Map class.
