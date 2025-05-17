@@ -132,13 +132,13 @@ const x = "hello" as number;
 // A union type allows you to specify that a variable or function parameter can hold one of several types.
 // This is useful for defining variables that can have multiple types of values.
 
-let value: string | number; // A variable that can be a string or a number
+let value: string | number; // a variable that can be a string or a number
 value = "Hello";
 console.log(value); // Outputs: Hello
 value = 42;
 console.log(value); // Outputs: 42
 let values = (string | number)[] // an array each element of which can be either a string or a number
-let a = string | number[] // a let the value of which can be either a string or an array of numbers
+let a = string | number[] // a var the value of which can be either a string or an array of numbers
 
 // Function with union type parameter
 function printId(id: string | number): void {
@@ -215,7 +215,7 @@ type CatAndDog = Cat & Dog; // only name: string
 // This helps maintain type consistency and reduces the need to duplicate type definitions.
 let originalVar = { name: "Alice", age: 30 };
 let newVar: typeof originalVar;
-newVar = { name: "Bob", age: 25 }; // Correct
+newVar = { name: "Bob", age: 25 }; // correct
 newVar = { name: "Charlie" }; // error: Property 'age' is missing in type '{ name: string; }' but required in type '{ name: string; age: number; }'.
 
 // @@@ Declaring a variable with the return type of an existing function
