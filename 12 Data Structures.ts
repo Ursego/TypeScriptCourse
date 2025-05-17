@@ -3,6 +3,8 @@
 // Array:
 // ######################################################################################################
 
+// A dynamically-sized (can grow or shrink as needed), ordered collection of items.
+
 // @@@ Array declaration syntax
 
 // TypeScript supports two syntaxes for arrays: T[] and Array<T>:
@@ -118,8 +120,9 @@ mutableArr = readOnlyArr; // error: The type 'readonly string[]' is 'readonly' a
 // Tuple
 // ######################################################################################################
 
-// Tuple is a subtype of Array.
-// It allows fixed-length arrays to be typed, where the values at each index have specific known types, not necesserily the same.
+// A fixed-size, ordered collection where each element has a specific, known type, not necesserily the same.
+// For example, [string, number] defines a tuple with a string as the first element and a number as the second. The length and types of elements are fixed.
+
 // So, it's a sort of Array that knows exactly how many elements it contains, and exactly which types it contains at specific indexes.
 // In contast to objects, fields don't have names (only positions). If you need to access the fields by name, use an object instead of a Tuple.
 // Tuples are typically used when we need to pass normally unrelated values together.
@@ -259,7 +262,10 @@ const enum Language {
 // Map
 // ######################################################################################################
 
-// In TypeScript (and JavaScript), you cannot use dot notation or square bracket notation to directly access or set values in a Map object.
+// A collection that holds key-value pairs where keys can be of any data type (including objects).
+// Maps maintain the insertion order of elements. TypeScript provides type parameters to specify the types of keys and values (e.g., Map<string, number>).
+
+// You cannot use dot notation or square bracket notation to directly access or set values in a Map object.
 // Instead, you must use the set and get methods provided by the Map class.
 
 let map: Map<string, number> = new Map();
