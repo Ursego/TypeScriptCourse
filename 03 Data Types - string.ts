@@ -35,12 +35,14 @@ const str1 = "Hello";
 const str2 = "world";
 // Using the + Operator:
 const concatenated = str1 + ", " + str2 + "!"; // "Hello, world!"
-// Using the concat Method:
+// Using the concat method (try to avoid):
 const concatenated = str1.concat(", ", str2, "!"); // "Hello, world!"
+// Using template literals (template strings), which will be described next:
+const concatenated = `${str1}, ${str2}!`; // "Hello, world!"
 
 //### Template Literals
 
-// Template literals in TypeScript (and JavaScript) are enclosed by backticks (`) instead of single quotes (') or double quotes (").
+// Template literals are enclosed by backticks (`) instead of single quotes (') or double quotes (") and allow embedding expressions using the ${expression} syntax.
 // They allow for more advanced string formatting and embedding of expressions directly within strings.
 
 // @@@ Multi-line strings
