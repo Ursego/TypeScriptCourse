@@ -66,6 +66,15 @@ for (let i = 0; i < arrayOfStrings.length; i++) {
 	console.log('array item = ${val}');
 }
 
+// @@@ Element existence checking
+
+// includes(value) checks if the array contains a value. Returns true or false:
+let myArr = [1, 2, 3]
+let hasValue = myArr.includes(2) // hasValue = true
+
+// indexOf(value) returns the index of the value, or -1 if not found:
+let index = myArr.indexOf(2) // index = 1
+
 // @@@ A few ways to add an element to an Array
 
 // 1. Using index assignment:
@@ -313,3 +322,110 @@ for (let [key, value] of userProfiles) {
 // Clearing the Map
 userProfiles.clear();
 console.log(userProfiles.size); // Output: 0
+
+
+
+// ######################################################################################################
+// Set
+// ######################################################################################################
+
+// A collection of unique values. It's based on the JavaScript Set object and offers methods for adding, deleting, and checking for values.
+
+// Key features of Set:
+// - Stores unique values only (duplicates are automatically removed)
+// - Can contain values of any type
+// - Maintains insertion order
+// - Provides efficient lookup operations
+// - Has built-in methods for adding, deleting, and checking values
+
+// Here's a simple example:
+
+// Create a new Set
+const fruits = new Set<string>();
+
+// Add values
+fruits.add("apple");
+fruits.add("banana");
+fruits.add("orange");
+fruits.add("apple"); // This won't be added as it's a duplicate
+
+// Check if a value exists
+console.log(fruits.has("banana")); // true
+console.log(fruits.has("grape")); // false
+
+// Get the size
+console.log(fruits.size); // 3
+
+// Delete a value
+fruits.delete("banana");
+console.log(fruits.size); // 2
+// Note that delete() will not throw an error if the value doesn't exist in the Set:
+fruits.delete("pear"); // no error, just returns false (if the value existed, it would return true)
+
+// Iterate over the Set
+fruits.forEach(fruit => {
+  console.log(fruit);
+});
+// Output:
+// apple
+// orange
+
+// Convert to array
+const fruitArray = Array.from(fruits);
+console.log(fruitArray); // ["apple", "orange"]
+
+// Clear the Set
+fruits.clear();
+console.log(fruits.size); // 0
+
+// @@@ Replacing an element
+
+// As you see, Sets don't have a direct replacement operation - you cannot change the value of an existing element as you can in Array.
+// Instead, you need to delete the old value and add the new one.
+// If you do that frequently, create this function:
+function replaceInSet<T>(set: Set<T>, oldValue: T, newValue: T): void {
+	set.delete(oldValue);
+	set.add(newValue);
+}
+
+// @@@ Ordered behavior in Set
+
+// Set preserves the order in which elements were inserted — but you cannot access elements by index like you can with an Array.
+// So while the iteration order of a Set matches the insertion order (e.g., in for...of or Set.forEach()), you cannot do something like mySet[1].
+// To access elements by index, you would need to convert the Set to an Array first, for example:
+Array.from(mySet)[1]
+// or
+[...mySet][1]
+
+// @@@ Set vs. Array
+
+// Set is implemented using a hash-based structure — typically a hash table or a similar optimized structure (sometimes a hybrid with linked entries for order retention).
+// Access is based on value identity, not index.
+// Lookup by value (has) is fast.
+// Set provides more efficient and semantically clear operations for handling unique values compared to Array.
+
+// Array is implemented as a contiguous block of memory where elements are stored by index.
+// It allows fast index-based access and is optimized for sequential storage.
+// Lookup by value (includes, indexOf) is slower.
+
+// Both support iteration and ordered behavior, but:
+// 		only Set guarantees uniqueness with better performance for add/has/delete operations;
+// 		only Array supports random access by index.
+
+// Here's a comparison of the key functions:
+
+// add vs. push:
+// 		Set.add(value) adds a value only if it's not already present, ensuring uniqueness.
+// 		Array.push(value) simply appends the value, even if it's already in the array, so you can have duplicates.
+
+// has vs. includes:
+// 		Set.has(value) checks if a value exists in the set with constant time complexity on average.
+// 		Array.includes(value) does the same but with linear time complexity since it may need to scan through the entire array.
+
+// delete vs. splice/filter:
+// 		Set.delete(value) removes the value if present, again with constant time complexity.
+// 		For arrays, you typically use Array.filter() or Array.splice() to remove elements, which involves scanning the array and possibly shifting elements, making it less efficient.
+
+// So, Set is better for operations involving uniqueness and faster lookups, while Array is more flexible for ordered collections and supports more general-purpose operations.
+
+

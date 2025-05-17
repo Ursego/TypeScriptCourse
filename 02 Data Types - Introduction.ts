@@ -26,7 +26,7 @@
 
 // @@@ Any
 // Whatever can be assigned to the var:
-var item1 : any = { id: 1, name: "item 1" };
+let item1 : any = { id: 1, name: "item 1" };
 item1 = { id: 2 }; // compiles successfully
 
 // @@@ Type inference
@@ -62,7 +62,7 @@ function testUndef(test) {
 testUndef(); // test parameter :undefined
 testUndef(null); // test parameter :null
 // TypeScript includes two keywords we can use in this case, null and undefined. Let's rewrite this function in TypeScript:
-function testUndef(test : null | number) {
+function testUndef(test: null | number) {
 	console.log('test parameter :' + test);
 }
 testUndef(); // Error: Expected 1 arguments, but got 0
@@ -93,10 +93,11 @@ function e() {
 		doSomething()
 	}
 }
-// Both of these will never return anything, so their return type is never.
+// Both of these will never return anything, so their return type is inferred as never.
 
 // @@@ Unknown:
-// It can be considered as a safe equivalent of the any type. In other words, before using a variable marked as unknown, we must explicitly cast it to a known type. Let's look at the similarities between unknown and any:
+// It can be considered as a safe equivalent of the any type. In other words, before using a variable marked as unknown, we must explicitly cast it to a known type.
+// Let's look at the similarities between unknown and any:
 let unknownType: unknown = "an unknown string";
 console.log('unknownType : ${unknownType}'); // unknownType : an unknown string
 unknownType = 1;
@@ -111,7 +112,7 @@ numberType = <number>unknownType;
 // @@@ Explicit casting (aka Type Assertion):
 // An object can be cast to the type of another object using the < > syntax.
 // This is not a cast in the strictest sense of the word; it is more of an assertion that is used at compile time by the TypeScript compiler.
-var item1 = <any>{ id: 1, name: "item 1" }; // the type of item1 is inferred as any, not hardcoded
+let item1 = <any>{ id: 1, name: "item 1" }; // the type of item1 is inferred as any, not hardcoded
 item1 = { id: 2 };
 // If you're using document.getElementById, TypeScript only knows that this will return some kind of HTMLElement, but you might know that your page will always have an HTMLCanvasElement with a given ID:
 const myCanvas = document.getElementById("main_canvas") as HTMLCanvasElement
@@ -137,7 +138,7 @@ console.log(value); // Outputs: Hello
 value = 42;
 console.log(value); // Outputs: 42
 let values = (string | number)[] // an array each element of which can be either a string or a number
-let a = string | number[] // a var the value of which can be either a string or an array of numbers
+let a = string | number[] // a let the value of which can be either a string or an array of numbers
 
 // Function with union type parameter
 function printId(id: string | number): void {
