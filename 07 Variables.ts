@@ -1,7 +1,8 @@
 // TypeScript can use var to declare variables, just like JavaScript.
-// However, it's generally recommended to use let or const instead due to the scoping issues associated with var.
+// However, it's strongly recommended to use let or const instead due to the scoping issues associated with var.
 
-// var, let, and const Comparison:
+// @@@ Comparison of var, let, and const
+
 // var
 // 		Function Scoped: The scope of a var variable is its current execution context, which is either the enclosing function or,
 //							for variables declared outside any function, the global context.
@@ -12,19 +13,18 @@
 // 		No Hoisting Issues: Although let variables are hoisted, they are not initialized. Accessing them before their declaration results in a ReferenceError.
 // 		Re-declaration: Re-declaring a let variable in the same scope results in a syntax error.
 // const
-// 		Block Scoped: The scope of a const variable is the block where it is defined.
-// 		No Hoisting Issues: Similar to let, accessing a const variable before its declaration results in a ReferenceError.
+// 		Block Scoped: same as in let.
+// 		No Hoisting Issues: same as in let.
 // 		Immutable Binding: A const variable cannot be reassigned. However, if the const variable is an object or array, its properties or elements can be modified.
 // 		Its value can only be set after the variable is defined and cannot be changed subsequently.
 
-// ### Using a variable before it is declared
+// @@@ Using a variable before it is declared
 
 // var:
-// We can use the variable before it is declared.
+// We can use the variable before it is declared - there is no check to see if the variable has been defined before we use it.
 // If the runtime encounters a variable that has not been defined or assigned a value before, then the value of that variable will be undefined:
 console.log('lValue = ${lValue}'); // lValue = undefined; since lValue doesn't exist, this line creates it
 var lValue = 2; // redefine lValue (create another var with the same name which replaces the existing one)
-// When using the var keyword, there is no check to see if the variable itself has been defined before we actually use it.
 // This can lead to heavy errors.
 
 // let:
@@ -32,7 +32,11 @@ var lValue = 2; // redefine lValue (create another var with the same name which 
 console.log('letValue = ${lValue}'); // Error: Block-scoped variable 'lValue' used before its declaration
 let lValue = 2;
 
-// ### Scope:
+// ////////////////////////////////////
+// The rest of the file describes 'let'
+// ////////////////////////////////////
+
+// @@@ Scope
 
 // Variables defined with let have block-level scope:
 let lValue = 2;
@@ -45,7 +49,7 @@ if (lValue == 2) {
 }
 console.log('lValue = ${lValue}'); // "lValue = 2"; if lValue was declared with var, the output would be "lValue = 333"
 
-// ### Reading from unititialized variables generates an error
+// @@@ Reading from unititialized variables generates an error
 
 // Standalone Variables:
 let myVar: number; // no default value
@@ -60,7 +64,7 @@ class Person {
   }
 }
 
-// ### Definite Assignment Assertion (!)
+// @@@ Definite Assignment Assertion (!)
 
 // In some cases we would like to declare a variable with the let keyword, populate it in another scope and use without TypeScript deciding that it's not populated.
 // For that, we can use the assert assignment syntax, which is to add an exclamation mark (!) after a variable.
@@ -93,18 +97,15 @@ class Person {
 // @@@ ! when the variable is actually used
 
 // If a variable or property is declared WITHOUT definite assignment assertion, you can use the non-null assertion operator
-//    when READING FROM it if you are confident that it will be assigned a value before use:
+//    when READING FROM it if you are confident that it will be populated at that point of time:
 
 let myVar: string; // neither default value nor !
 setMyVar(); // it populates myVar in another scope but the current scope doesn't know that
 console.log('myVar : ${myVar!}'); // no compile-time error; without ! you would get "Variable 'myVar' is used before being assigned"
 
-// The same method would work in class Person if you move the ! from the declaration of "name" to its consuming by console.log.
+// This method would work in class Person if you move the ! from the declaration of "name" to its consuming by console.log.
 
 // However, all these appoaches are dangerous since they can hide bugs.
 // They can cause runtime errors if the variable is indeed uninitialized, but may not be caught on testing in some specific branches of logic.
 // You do want this error if the var is supposed to be populated when read from, so try NOT to use ! (in both declaring and reading from the var).
 // The only case when you have no choise it's when the var is populated not in the scope where it is declared and read from.
-
-
-// ### Optional Function Parameters
