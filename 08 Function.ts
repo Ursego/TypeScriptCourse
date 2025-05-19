@@ -275,8 +275,8 @@ const processItem: ItemProcessorFuncType = (item: string) => { // create a const
 function processItems(items: string[], callback: ItemProcessorFuncType) { ... }
 // That approach brings the next advantages:
 //	1. We avoid code duplication.
-//	2. We enforce type safety: changing the ItemProcessorFuncType type in the future will enforce the developer to fix all the fragments where it's used.
-//	3. A powerful feature of self-documented code: if the signature is more complex, it immediately tells the developer that it's the same signature.
+//	2. Type safety: changing the ItemProcessorFuncType type in the future will enforce the developer to fix all the fragments where it's used.
+//	3. A powerful feature of self-documented code: if the signature is more complex, it immediately tells the developer that the same signature is used in many spots.
 
 // Notice that a type alias which defines an arrow function can be used for regular (non-arrow) functions too:
 function processItemRegular(item: string): string { // matches the ItemProcessorFuncType type
@@ -304,6 +304,7 @@ const timer = new Timer();
 timer.start();
 
 // @@@ Destructuring in Parameters
+
 //Arrow functions can use destructuring for parameters, which is useful for handling objects and arrays:
 const person = { name: "Alice", age: 25 };
 
@@ -313,7 +314,8 @@ const displayPerson = ({ name, age }: { name: string; age: number }) => {
 
 displayPerson(person); // output: Name: Alice, Age: 25
 
-//### Generator Functions
+// @@@ Generator Functions
+
 // Generator functions (or just generators) are a convenient way to generate a set of values.
 // They give the user fine-grained control over the pace at which values ​​are produced.
 // Lazy generators compute the next value only when the user asks them to.
@@ -324,7 +326,7 @@ displayPerson(person); // output: Name: Alice, Age: 25
 // When the user asks the generator for the next value (e.g. by calling next), yield will send the result back to the user
 //    and pause until the next value is requested.
 // We called createFibonacciGenerator, and it returned an IterableIterator.
-// Each time next is called, the iterator computes the next Fibonacci number and yield returns it to us:
+// Each time it's called, the iterator computes the next Fibonacci number and yield returns it to us:
 function* createFibonacciGenerator() {
 	let a = 0
 	let b = 1
@@ -375,9 +377,13 @@ let [one, two, ...rest] = numbers // [number, number, number[]]
 function sum(a: number, b: number): number {
 	return a + b
 }
-// What is the type of sum? Well, sum is a function, so its type is Function. How else can you type sum? sum is a function that takes two values ​​and returns a number. Let's express its type like this:
+// What is the type of sum? Well, sum is a function, so its type is Function. How else can you type sum? sum is a function that takes two values ​​and returns a number.
+// Let's express its type like this:
 (a: number, b: number) => number
-// In TypeScript, this syntax is used to indicate the type of a function. Otherwise known as a call (or type) signature. It's similar to an arrow function, and that's intended. You'll use this syntax to type functions when passing them as arguments or when returning them from other functions. The parameter names a and b are just for documentation and don't affect the compatibility of the function with the type. Let's look at a few functions and extract their types as individual call signatures, which we bind to type aliases:
+// In TypeScript, this syntax is used to indicate the type of a function. Otherwise known as a call (or type) signature. It's similar to an arrow function, and that's intended. 
+// You'll use this syntax to type functions when passing them as arguments or when returning them from other functions.
+// The parameter names a and b are just for documentation and don't affect the compatibility of the function with the type.
+// Let's look at a few functions and extract their types as individual call signatures, which we bind to type aliases:
 // function greet(name: string):
 type GreetFuncType = (name: string) => string
 // function log(message: string, userId?: string):
@@ -385,33 +391,21 @@ type LogFuncType = (message: string, userId?: string) => void
 // function sumVariadicSafe(...numbers: number[]): number:
 type SumVariadicSafeFuncType = (...numbers: number[]) => number
 
-// Now let's flesh out the relationships between call signatures and their implementations. Once you have a call signature, how can you declare a function that implements it? Simply by combining that signature with the function expression that implements it. As an example, let's rewrite Log to use its freshly baked signature:
-type LogFuncType = (message: string, userId?: string) => void
-let log: LogFuncType = ( // Объявляем выражение функции log и явно присваиваем ему тип LogFuncType
-	message, // message уже аннотирован как string в определении LogFuncType, позволяем TypeScript сделать вывод его типа на основе LogFuncType
-	userId = 'Not signed in' // We add a default value because we removed the userId type from the LogFuncType signature, which is a type and cannot contain default values.
-) => { // There is no need to re-annotate the return type - we already declared it as void in LogFuncType
-	let time = new Date().toISOString()
-	console.log(time, message, userId)
-}
-// The function typing syntax used in the previous section — type Fn = (…) => … — is a shorthand for the call signature:
-// Shorthand call signature:
+// Now let's flesh out the relationships between call signatures and their implementations.
+// Once you have a call signature, how can you declare a function that implements it?
+// Simply by combining that signature with the function expression that implements it.
+// As an example, let's rewrite Log to use its freshly baked signature.
+
+// STEP 1: Create a type alias for the signature:
 type LogFuncType = (message: string, userId?: string) => void
 // It can be written more explicitly. The full call signature is:
 type LogFuncType = {
 	(message: string, userId?: string): void
 }
 
-function times(
-	f: (index: number) => void,
-	n: number
-) {
-	for (let i = 0; i < n; i++) {
-		f(i)
-	}
+// STEP 2: Declare a variable of that type:
+let log: LogFuncType = (message, userId = 'Not signed in') => {
+	let time = new Date().toISOString()
+	console.log(time, message, userId)
 }
-// When calling times, you don't need to explicitly annotate the function passed to times if it's declared inline:
-times(n => console.log(n), 4)
-// TypeScript will infer from the context that n is a number, because we declared in the signature of times that the index argument of f is a number.
-
-// TypeScript understands that n is that argument, so it must be a number.
+// Note that the declaration of the log var has neither the parameters types nor the return type - they are described in the definition of LogFuncType.
