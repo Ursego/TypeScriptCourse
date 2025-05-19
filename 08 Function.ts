@@ -1,26 +1,42 @@
 //### Anonymous functions
 
-// These are functions that are defined on the fly and do not specify a function name:
+// These are functions that are defined on the fly and do not specify a function name; intead, they are pointed by a variable:
 const addFunction = function(a: number, b: number): number {
   return a + b;
   }
 let addFunctionResult = addFunction(2,3); // 5
+
+//### Optional parameters with default values:
+
+// TypeScript allows you to declare a parameter as optional by providing a default value:
+function concatStringsDefault(a: string, b: string, c = "c") {
+	return a + b + c;
+}
+let s1 = concatStringsDefault("a", "b"); // "abc"
+let s2 = concatStringsDefault("a", "b", "z"); // "abz"
+
+// Note that when we don't specify the type since it's inferred from the default value. However, you can specify it explicitly if you want:
+function concatStringsDefault(a: string, b: string, c: string = "c") { ... }
 
 //### Optional parameters without default values (?)
 
 // The question mark (?) is used to denote that the parameter is optional, i.e. can be omitted when the function is called.
 // It is important to understand that we are not talking about the optionality of the parameter's value - this is achieved with a "| null" or "| undefined" data type,
 //    or by declaring the parameter with a default value.
-// We are talking about whether the parameter exists at all (i.e. the memory is allocated for it).
-// It's fine if a parameter declared with ? will not be sent.
-// But if it will sent and it's defined without "| null", "| undefined" or a default value, its value is required - the caller must send it.
+// It's about whether the parameter is passed at all.
+
+// Let's say, you have a parameter, defined with ? but without "| null", "| undefined" or a default value.
+// It's fine if that parameter is not passed at all.
+// But if it's passed, its value must be defined and be not null.
 
 function funct(age?: number) {
-  console.log(`Age is ${age !== undefined ? age : "not provided"}`);
+  console.log(`Age is ${ age === undefined ? "not provided" : age }`);
 }
 
 funct(25); // Output: Age is 25
-funct();   // Output: Age is not provided
+funct();   // Output: Age is not provided (that's fine not to pass the parameter at all)
+let age: number | undefined;
+funct(age); // error! If you do pass the parameter, it must be populated - the parameter is optional, but not its value
 
 // Notice this case:
 class Base {
@@ -39,47 +55,27 @@ class Derived extends Base {
 const d = new Derived();
 d.greet();
 d.greet("reader");
-// You could think that greet(name?: string) in Derived doesn't override greet() in Base but overloads.
-// However, since "name" in Derived is optional (i.e. could be not provided at all), that also covers the greet() signature in Base, so it's an overriding.
+// You could think that greet(name?: string) in Derived overloads greet() in Base since their signatures are different.
+// However, since "name" in Derived could be not provided, that also covers the greet() signature in Base, so it's an overriding.
 
-// IMPORTANT! Any optional parameters (be them declared with ? or with a default value) must come last - after required ones:
-function concatStrings(a: string, b: string, c?: string) {
-	return a + b + c;
-}
-let concat3strings = concatStrings("a", "b", "c"); // "abc"
-let concat2strings = concatStrings("a", "b"); // "ab"
-let concat1string = concatStrings("a"); // error: Expected 2-3 arguments, but got 1
+// IMPORTANT! Any optional parameters (be them declared with ? or with a default value) must come last - after all required parameters:
+function f(a: string, b: string, c?: string) { } // OK
+function f(a: string, b?: string, c: string) { } // Error
 
-//### Optional parameters with default values:
+// A few optional parameters
 
-// TypeScript allows you to declare a parameter as optional by providing a default value:
-function concatStringsDefault(a: string, b: string, c = "c") {
-	return a + b + c;
-}
-let s1 = concatStringsDefault("a", "b"); // "abc"
-let s2 = concatStringsDefault("a", "b", "z"); // "abz"
-
-// Note that when we don't specify the type since it's inferred from the default value. However, you can specify it explicitly if you want:
-function concatStringsDefault(a: string, b: string, c: string = "c") { ... }
-
-//### JavaScript 'arguments' object in a function
-
-// In JavaScript, 'arguments' is an array-like object available within all non-arrow functions. It contains all the arguments passed to the function.
-// When you use 'arguments' in TypeScript, it behaves the same way as in JavaScript - lacks strong type information:
-function example() {
-  for (let i = 0; i < arguments.length; i++) {
-    console.log(arguments[i]);
-  }
-}
-example("Hello", 42, true);
-// The 'arguments' object is of type IArguments, which is an interface provided by TypeScript.
-// This interface doesn't have strong type information about the arguments, only that it's an array-like object.
+// Actual parameters are assigned to formal parameters in order from left to right, skipping optional parameters only when arguments are omitted.
+// Each provided argument is matched with the corresponding parameter in the function signature based on position.
+// Let's say, you have this function:
+function f(a: string, b?: string, c?: string) { }
+// When you call
+f("x", "y")
+// the value "y" will be interpreted as parameter b, not c.
 
 //### Rest parameters:
 
 // The rest (remaining) parameters use TypeScript's three-dot (...) syntax in the function declaration to express a variable number of function parameters.
-// TypeScript encourages the use of rest parameters array (...args) instead of 'arguments' for better type safety and readability.
-// The rest parameters array can have any name but the convention is to name it 'args'.
+// The rest parameters array can have any name but the conventional name is 'args':
 function example(...args: (string | number | boolean)[]) {
   for (let i = 0; i < args.length; i++) {
     console.log(args[i]);
@@ -88,24 +84,40 @@ function example(...args: (string | number | boolean)[]) {
 example("Hello", 42, true);
 
 // We can also combine regular parameters with remainders in a function definition.
-// A function can have at most one remainder parameter, and that parameter must be the last one:
+// A function can have only one remainder parameter, and that parameter must be the last one:
 function testNormalAndRestArguments(arg1: string, arg2: number, ...args: number[]) { ... }
 
-// The parameter's type annotation is an object type:
-function printCoord(pt: { x: number; y: number }) { // you can use , or ; to separate the properties, and the last separator is optional either way
-	console.log("The coordinate's x value is " + pt.x);
-	console.log("The coordinate's y value is " + pt.y);
-}
-printCoord({ x: 3, y: 7 });
+// @@@ Passing parameters by name
 
-// In fact, this is the way to access args BY NAME when calling a finction!
-function printName(arg: { first: string; last?: string }) {
-	console.log(arg.last.toUpperCase());
-	if (arg.last !== undefined) {
-		console.log(arg.last.toUpperCase());
+// In TypeScript, parameters are positional. You cannot pass them by name as in some other programming languages:
+
+function printCoord(x: number, y: number) {
+	console.log("The coordinate's x value is " + x);
+	console.log("The coordinate's y value is " + y);
+}
+printCoord(x: 3, y: 7); // error - that would work in C# but not in TypeScript
+printCoord(x = 3, y = 7); // error - that would work in Kotlin but not in TypeScript
+printCoord(3, 7); // success - only by position
+
+// However, you can fake passing parameters by name by doing the next change in the function's signature:
+//    1. Declare only one parameter (you can name it 'p' to shorten subsequent code lines in the body of the function).
+//    2. The type of that parameter must be an inline object, the fields of which otherwise would be the function parameters.
+
+// Let's re-write our printCoord in that way:
+function printCoord(p: { x: number, y: number }) { // the shape of the inline object is an exact copy of the previous printCoord's signature
+	console.log("The coordinate's x value is " + p.x);
+	console.log("The coordinate's y value is " + p.y);
+}
+printCoord({ x: 3, y: 7 }); // we have done that!
+
+// The extra curly braces are not a too high price for the flexibility the trick provides in more comlex real-life logic.
+
+// Another example (with an optional field):
+function printName(p: { first: string; last?: string }) {
+	console.log(p.first.toUpperCase());
+	if (p.last !== undefined) {
+		console.log(p.last.toUpperCase());
 	}
-	// A safe alternative for checking undefined is using modern JavaScript syntax:
-	console.log(obj.last?.toUpperCase());
 }
 printName({ first: "Bob" });
 printName({ first: "Alice", last: "Alisson" });
