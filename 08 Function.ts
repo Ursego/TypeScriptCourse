@@ -33,8 +33,8 @@ function funct(age?: number) {
   console.log(`Age is ${ age === undefined ? "not provided" : age }`);
 }
 
-funct(25); // Output: Age is 25
-funct();   // Output: Age is not provided (that's fine not to pass the parameter at all)
+funct(25); // output: Age is 25
+funct();   // output: Age is not provided (that's fine not to pass the parameter at all)
 let age: number | undefined;
 funct(age); // error! If you do pass the parameter, it must be populated - the parameter is optional, but not its value
 
@@ -125,21 +125,21 @@ printName({ first: "Alice", last: "Alisson" });
 //### Function declaration
 
 // JavaScript and TypeScript offer at least five ways to declare a function:
-// Named function:
+// 1. Named function:
 function greet(name: string) {
   return 'hello ' + name
 }
-// Function expression:
+// 2. Function expression:
 let greet2 = function(name: string) {
   return 'hello ' + name
 }
-// Arrow function expression:
+// 3. Arrow function expression:
 let greet3 = (name: string) => {
   return 'hello ' + name
 }
-// Shorthand arrow function expression:
+// 4. Shorthand arrow function expression:
 let greet4 = (name: string) => 'hello ' + name
-// Function constructor:
+// 5. Function constructor:
 let greet5 = new Function('name', 'return "hello " + name')
 
 // Except for the function constructor (which is deprecated), these syntaxes are supported by TypeScript in type-safe mode
@@ -149,19 +149,19 @@ let greet5 = new Function('name', 'return "hello " + name')
 // But its parameters and return type are untyped - you can call such a function with any arguments,
 //    and TypeScript will not even react to such illegal actions.
 
-//### "this" in functions
+// @@@ 'this' in functions
 
-// Using this in TypeScript functions can be tricky due to how this is handled in JavaScript
+// Using 'this' in TypeScript functions can be tricky due to how this is handled in JavaScript.
 
-// In JavaScript, the value of this is determined by how a function is called, not where it is defined. This leads to several scenarios:
+// In JavaScript, the value of 'this' is determined by how a function is called, not where it is defined. This leads to several scenarios:
 
-// @@@ Global Context: In a non-strict mode function, this refers to the global object (e.g., window in browsers).
+// 1. Global Context: In a non-strict mode function, this refers to the global object (e.g., window in browsers).
 function globalFunction() {
   console.log(this); // Window object (in browser)
 }
 globalFunction();
 
-// @@@ Object Method: When a method is called on an object, this refers to that object.
+// 2. Object Method: When a method is called on an object, this refers to that object.
 const obj = {
   value: 42,
   method() {
@@ -170,84 +170,88 @@ const obj = {
 };
 obj.method();
 
-// @@@ Constructor: When a function is used as a constructor, this refers to the new instance created by new.
+// 3. Constructor: When a function is used as a constructor, this refers to the new instance being constructed.
 function MyClass() {
   this.value = 42;
 }
 const instance = new MyClass();
 console.log(instance.value); // 42
 
-// @@@ Event Handlers and Callbacks: In event handlers, this typically refers to the element that triggered the event.
-// In callbacks, the value of this can vary based on how the callback is invoked.
+// 4. Event Handlers and Callbacks: In event handlers, 'this' typically refers to the element that has triggered the event.
+// In callbacks, the value of 'this' can vary based on how the callback is invoked.
 // When passing methods as callbacks, this may not refer to the instance of the class as expected.
-class Example {
-  value = 42;
-  logValue() {
-    console.log(this.value);
-  }
-}
-const example = new Example();
-setTimeout(example.logValue, 1000); // Undefined or error, 'this' is not bound
-// When you pass example.logValue to setTimeout, you're passing a reference to the method, not the method bound to the example instance.
-// When setTimeout executes the function, it does so without any context, so this inside logValue will not refer to the example instance.
-// When setTimeout calls example.logValue, the function is executed with this set to the global object (or undefined in strict mode), not the example instance.
-// Thus, this.value inside logValue does not refer to example.value.
-
-// @@@ Ways to make 'this' behave as expected
-
-// There are two ways to guarante 'this' value to be correct at runtime, even for code not checked with TypeScript:
-
-// @@@ Using bind
-// You can explicitly bind the method to the instance using bind():
 class Example {
   value = 42;
   logValue() { console.log(this.value); } // 'this' is expected to refer to the instance of 'Example' but it won't always
 }
 const example = new Example();
-setTimeout(example.logValue.bind(example), 1000); // works as expected (outputs 42) since you binded the logValue method to the "example" object's context
+setTimeout(example.logValue, 1000); // Undefined or error, 'this' is not bound
+// When you pass example.logValue to setTimeout, you're passing a reference to the method, not the method bound to the example instance.
+// When setTimeout executes the function, it does so without any context, so this inside logValue will not refer to the example instance.
+// When setTimeout calls example.logValue, the function is executed with 'this' set to the global object (or undefined in strict mode), not the Example's instance.
+// Thus, this.value inside logValue does not refer to example.value.
 
-// @@@ Using Arrow Functions
+// Ways to make 'this' behave as expected
+
+// There are two ways to guarante 'this' value to be correct at runtime, even for code not checked with TypeScript:
+
+// 1. Using bind
+// You can explicitly bind the method to the instance using bind():
+class Example {
+  value = 42;
+  logValue() { console.log(this.value); }
+}
+const example = new Example();
+setTimeout(example.logValue.bind(example), 1000); // works as expected (outputs 42) since you binded the logValue method to the Example object's context
+
+// 2. Using Arrow Functions
 // Arrow functions do not have their own this context; they inherit this from the enclosing scope:
 class Example {
   value = 42;
-  logValue = () => { console.log(this.value); } // 'this' correctly refers to the instance of 'Example'
+  logValue = () => console.log(this.value); // 'this' correctly refers to the instance of Example
 }
 const example = new Example();
-setTimeout(example.logValue, 1000); // works as expected since the arrow function (pointed by the logValue property) automatically has the "example" object's context
+setTimeout(example.logValue, 1000); // works as expected since the arrow function (pointed by the logValue property) automatically has the Example object's context
 // However, you can’t use super.logValue in a derived class, because there’s no entry in the prototype chain to fetch the base class method from.
 
-//### Arrow function
+// @@@ More about Arrow function
 
-// Provides a way to write anonymous functions (functions without a name) in a more concise and readable manner.
-// Has several advantages, such as a shorter syntax, no binding of this, and more predictable behavior in certain contexts.
+// It provides a way to write anonymous functions (functions without a name) in a more concise and readable manner.
+// Has several advantages, such as a shorter syntax, no binding of 'this', and more predictable behavior in certain contexts.
 // In TypeScript, arrow functions serve the same purpose as lambda expressions in languages like C# or Java. 
-// Commonly used for callbacks and array operations due to their concise syntax, and within classes to maintain the correct this context.
+// Commonly used for callbacks and array operations due to their concise syntax, and within classes to maintain the correct 'this' context.
 // The basic syntax of an arrow function is:
-(param1, param2, ..., paramN) => expression
+(param1: type1, param2: type2, ..., paramN: typeN): returntype => body
 // Example:
 const add = (a: number, b: number): number => a + b;
-console.log(add(5, 3)); // Output: 8
+console.log(add(5, 3)); // output: 8
 // That created an anonymous function and placed a pointer to it in the 'add' constants.
 
-// For functions with multiple statements, use curly braces:
-(param1, param2, ..., paramN) => {
-  // statements
+// Since the function body is just one expression, it's not ornamented with curly braces, and the expression's result is returned without the 'return' keyword.
+// However, the function could be written with them as well. The next code is absolutely equivalent:
+const add = (a: number, b: number): number => {
+  return a + b;
+}
+// The second variant is more readable since the signature and the logic are visually separated, but it makes the code a bit longer.
+
+// For functions with multiple statements:
+//    1. The expression MUST include curly braces.
+//    2. A value MUST be returned using the 'return' keyword.
+(param1: type1, param2: type2, ..., paramN: typeN): returntype => {
+  // ...statements...
+  // return ...;
 }
 // Example:
 const multiply = (a: number, b: number): number => {
   const result = a * b;
   return result;
 };
-console.log(multiply(5, 3)); // Output: 15
+console.log(multiply(5, 3)); // output: 15
 
-// @@@ No Arguments Object
-// Arrow functions do not have their own arguments object.
-// If you need to access arguments, you must use a regular function or rest parameters.
-
-// @@@ Usage arrow functions as a callbacks
+// Using arrow functions as callbacks
 const numbers = [1, 2, 3, 4, 5];
 const squares = numbers.map(n => n * n);
-console.log(squares); // Output: [1, 4, 9, 16, 25]
+console.log(squares); // output: [1, 4, 9, 16, 25]
 // Let's create an example function that accepts a callback function as an argument and uses it within the function:
 const processItem: (item: string) => string = (item: string) => {
   return item.toUpperCase();
@@ -307,7 +311,7 @@ const displayPerson = ({ name, age }: { name: string; age: number }) => {
   console.log('Name: ${name}, Age: ${age}');
 };
 
-displayPerson(person); // Output: Name: Alice, Age: 25
+displayPerson(person); // output: Name: Alice, Age: 25
 
 //### Generator Functions
 // Generator functions (or just generators) are a convenient way to generate a set of values.
