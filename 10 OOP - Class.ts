@@ -1,4 +1,4 @@
-// ### Acess modifiers
+// @@@ Acess modifiers
 
 // public - Accessible from anywhere.
 // private - Accessible only from instances of a specific class.
@@ -6,24 +6,38 @@
 
 // If you do not specify an access modifier for properties or functions, their default access level will be public.
 
-// ### readonly property
+// @@@ readonly property
 
 // You cannot directly declare a class property as a constant in the same way you would with a const variable.
 // However, you can achieve a similar effect by using the readonly modifier to ensure that the property is assigned once and cannot be changed afterward.
-// The 'readonly' modifier makes a property immutable after its initial assignment, which can be done either at the point of declaration or within the constructor. 
+// The 'readonly' modifier makes a property immutable after its initial assignment, which can be done at one of two the points:
+//    1. On declaration.
+//    2. Within the constructor - in the constructor's code itself, not in a function called from the constructor.
+//            TypeScript does not analyze methods you invoke from the constructor to detect initializations, because a derived class
+//            might override those methods and fail to initialize the members.
 // This effectively creates a constant property within the class.
+
 // You can use readonly in combination with other visibility modifiers like public, private, and protected.
 // The readonly modifier must be placed before the visibility modifier.
+
 // An iteresting moment is that constructor can still override the value, assigned on the declaration (so, technically, it's populated twice):
 class Greeter {
-  readonly public name: string = "Mary";
-  constructor(otherName: string) { this.name = otherName; } // ok
+  readonly name: string = "Paul";
+
+  constructor(otherName?: string) {
+    if (otherName) {
+      this.name = otherName;
+    }
+  }
+  
   rename(otherName: string) { this.name = otherName; }// error: Cannot assign to 'name' because it is a read-only property.
 }
-const g = new Greeter();
-g.name = "John"; // error: Cannot assign to 'name' because it is a read-only property.
 
-//### strictPropertyInitialization
+const paul = new Greeter();
+const john = new Greeter("John");
+john.name = "George"; // error: Cannot assign to 'name' because it is a read-only property.
+
+// @@@ strictPropertyInitialization
 
 // Requires that all instance properties be initialized (on declarion or in the constructor) or have a definite assignment assertion (will be explained soon). 
 // You need to set strictPropertyInitialization to true in your tsconfig.json file.
@@ -36,39 +50,33 @@ g.name = "John"; // error: Cannot assign to 'name' because it is a read-only pro
 }
 
 class Person {
-  name: string; // error: Property 'name' has no initializer and is not definitely assigned in the constructor.
-  age: number;
+  name: string; // error: Property 'name' has no initializer and is not assigned in the constructor.
+  age: number; // ok - it will be initialized in the constructor
 
   constructor(age: number) {
     this.age = age;
   }
 }
-// Note that the field needs to be initialized in the constructor itself.
-// TypeScript does not analyze methods you invoke from the constructor to detect initializations, because a derived class
-//    might override those methods and fail to initialize the members.
+// As with the readonly modifier, the field needs to be initialized in the constructor itself.
 
-// Solutions to satisfy strictPropertyInitialization:
-// 1. Initialize the Property Directly:
-name: string = "Default Name";
-// 2. Initialize the property in the constructor:
-  constructor(name: string, age: number) {
-    this.name = name; // <<<<<<<<<<<<<<
-    this.age = age;
-  }
-// 3. Use Definite Assignment Assertion (!):
+// We have considered two ways of initializing fields with strictPropertyInitialization set to true - in the declaration and in the constructor.
+// However, if this was not done, there are 3 methods to satisfy strictPropertyInitialization and suppress the compilation error:
+
+// 1. Use Definite Assignment Assertion (!):
 //		Use it if you intend to definitely initialize a field through means other than the constructor (for example, maybe in a function called from the constructor):
 name!: string; // when declaring the field, or
 console.log('name : ${name!}'); // when the field is actually used
 // For more details, see https://github.com/Ursego/TypeScriptCourse/blob/main/07%20Variables.ts >>> "### Definite Assignment Assertion (!)"
-// 4. Optional value (declare the property with a union type that includes undefined):
+
+// 2. Optional value (declare the property with a union type that includes undefined):
 // 		By adding a union of types here, we make a conscious decision that the id property may be undefined:
 name: string | undefined;
-// 5. Optional property (?):
 
+// 3. Optional property (?):
 //    The question mark (?) is used to denote that the property (field) is optional. This means that the property can be provided or it can be omitted.
-//    It is important to understand that we are not talking about the optionality of the property's value - this is achieved with a "| null" or "| undefined" data type.
+//    It is important to understand that we are not talking about the optionality of the property's value - that would be achieved with a "| null" or "| undefined" data type.
 //    We are talking about whether the property exists at all (i.e. the memory is allocated for it).
-//    It's fine if a field declared with ? will not exist. But if it will exist and it's defined without "| null" or "| undefined", a value is not optional - it must be assigned.
+//    It's fine if a field declared with ? will not exist. But if it exists and is defined without "| null" or "| undefined", its value is required.
 
 class Person {
   name: string; // always exists and must be provided 
@@ -78,8 +86,8 @@ class Person {
     this.name = name;
   }
 
-  setAge(age: string) {
-    if (this.age) { // if the property is optional, it must be checked for existence before being used!
+  setAge(age: number) {
+    if (this.age) { // if the property is optional, it must be checked for existence before being used
       this.age = age;
     }
   }
@@ -91,9 +99,9 @@ const bob: Person = { name: "Bob" }; // no compilation error thanks to ? in "age
 console.log(alice); // Output: { name: 'Alice', age: 30 }
 console.log(bob); // Output: { name: 'Bob' } - it doesn't print "age: undefined" since the age property doesn't exist at all
 
-//### 'private' keyword vs. using the # syntax for private fields
+// @@@ 'private' keyword vs. using the # syntax for private fields
 
-// @@@ 'private' keyword
+// >>> 'private' keyword
 // The private keyword is a TypeScript-specific feature that enforces encapsulation at the TypeScript type level.
 // It means that the property or method is accessible only within the class it is declared in.
 // However, this encapsulation is inforced only at compile time by TypeScript.
@@ -106,7 +114,7 @@ const s = new MySafe();
 console.log(s.secretKey); // error: Property 'secretKey' is private and only accessible within class 'MySafe'.
 console.log(s["secretKey"]); // ooops... that is allowed! :-(
 
-// @@@ The # syntax for private fields
+// >>> The # syntax for private fields
 // It's a feature of the JavaScript language itself, introduced in ECMAScript 2019 (ES10).
 // Is truly private and is enforced at runtime by JavaScript.
 // The property is not accessible outside the class under any circumstances, even by TypeScript.
@@ -119,10 +127,10 @@ const example = new Example(10);
 console.log(example.getX()); // 10
 console.log(example.#x); // Error: Private field '#x' must be declared in an enclosing class
 
-//### Cross-instance private access
+// @@@ Cross-instance private access
 // Different OOP languages disagree about whether different instances of the same class may access each others’ private members.
 // While languages like Java, C#, C++, Swift, and PHP allow this, Ruby does not.
-// TypeScript does allow cross-instance private access (which is stupid since it breaks the main principle of incapsulation):
+// TypeScript does allow cross-instance private access (which is wrong since it breaks the main principle of incapsulation):
 class A {
   private x = 10;
  
@@ -131,7 +139,7 @@ class A {
   }
 }
 
-//### Property shadowing
+// @@@ Property shadowing
 
 // When a derived class declares a property with the same name as a property in the base class, it does not override the base class's property.
 // Instead, it shadows ("hides") it, creating a new field in the derived class.
@@ -149,7 +157,7 @@ const derivedInstance = new Derived();
 console.log(derivedInstance.getDerivedX()); // output: 5
 console.log(derivedInstance.getBaseX()); // output: 1
 
-//### Cross-hierarchy protected access
+// @@@ Cross-hierarchy protected access
 
 // Different OOP languages disagree about whether it’s legal to access a protected member through a base class reference:
 class Base {
@@ -169,7 +177,7 @@ class Derived2 extends Base {
 // Java, for example, considers this to be legal. On the other hand, C# and C++ chose that this code should be illegal.
 // TypeScript sides with C# and C++ here, because accessing x in Derived2 should only be legal from Derived2’s subclasses, and Derived1 isn’t one of them.
 
-//### Parameter Properties
+// @@@ Parameter Properties
 
 // TypeScript offers special syntax for turning a constructor parameter into a class property with the same name and value.
 // Parameter properties are created by prefixing a constructor argument with one of the visibility modifiers public, private, protected, or readonly.
@@ -206,7 +214,7 @@ class Person {
   getAge() { return this.#age; }
 }
 
-//### Getters / setters:
+// @@@ Getters / setters:
 
 // Methods which are called using "variable-like" syntax:
 class ClassWithAccessors {
@@ -226,7 +234,7 @@ console.log('id property is set to ${classWithAccessors.id}'); // the getter is 
 //		If the type of the setter parameter is not specified, it is inferred from the return type of the getter
 //		Getters and setters must have the same Member Visibility (both public/protected/private).
 
-//### Fake final classes
+// @@@ Fake final classes
 
 // Although TypeScript does not support the final keyword for classes and methods, it can be easily faked.
 // To fake final classes in TypeScript, you can use private constructors:
@@ -245,7 +253,7 @@ class MessageQueue {
 	}
 }
 
-//### Abstract classes and abstract methods
+// @@@ Abstract classes and abstract methods
 
 // An abstract class is a class that cannot be instantiated on its own.
 // It serves as a blueprint for other classes.
@@ -278,12 +286,12 @@ const cat = new Cat();
 cat.makeSound(); // Output: Meow! Meow!
 cat.move();      // Output: Roaming the earth...
 
-//### Inheritance:
+// @@@ Inheritance:
 
 // Function in descendand overrides the function with the same sugnature in the ancestor.
 // The "super" keyword can be used in the descentant to call the overridden version.
 
-//### Polymorphism
+// @@@ Polymorphism
 
 // In TypeScript (as well as in JavaScript), if an overridden method in a derived class instance is called through a base class reference,
 //    the version of the method defined in the derived class will be called.
@@ -300,7 +308,7 @@ class Tiger extends Animal {
 let tiger: Animal = new Tiger();
 tiger.move(); // prints "Tiger is moving"
 
-//### Available methods and properties are defined by the variable type, not by the actual object type
+// @@@ Available methods and properties are defined by the variable type, not by the actual object type
 
 // It's impossible to directly call a method or access a property that exists only in the derived class (Tiger) if the variable is of the base class type (Animal). 
 // This is because TypeScript uses static typing, which means that the type of the variable determines what methods and properties can be accessed.
@@ -334,9 +342,9 @@ if (tiger instanceof Tiger) {
   let stripes = tiger.stripes;
 }
 
-//### Static
+// @@@ Static
 
-// @@@ Static vars & methods
+// >>> Static vars & methods
 class Counter {
   static count: number = 0;
   constructor() { Counter.count++; }
@@ -344,9 +352,9 @@ class Counter {
 }
 const counter1 = new Counter();
 const counter2 = new Counter();
-console.log(Counter.getCount()); // Output: 2; static methods can be called on the class itself, rather than on instances of the class
+console.log(Counter.getCount()); // output: 2; static methods can be called on the class itself, rather than on instances of the class
 
-// @@@ static block in class (static initializer)
+// >>> static block in class (static initializer)
 // It's a feature introduced in ECMAScript 2022 (ES13) and supported by TypeScript.
 // The static initializer executes immediately when the class is loaded (i.e. accessesed for the first time).
 // Static blocks are useful for performing setup tasks, initializing static properties, or executing code
@@ -371,7 +379,7 @@ const instance1 = new MyClass();
 const instance2 = new MyClass();
 console.log(MyClass.getCount()); // Output: 2
 
-// @@@ No static classes
+// >>> No static classes
 // Unlike some other programming languages (like C#), TypeScript does not have the concept of static classes.
 // A static class is a class that cannot be instantiated and is used to group related static methods and properties.
-// To mimic it in TypeScript, just create a regular class with all vars & methods static, and a private constructor with no factory method.
+// To mimic it in TypeScript, just create a regular class with all vars & methods static, and a private constructor and with no factory method.
