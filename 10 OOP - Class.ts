@@ -101,36 +101,34 @@ console.log(bob); // Output: { name: 'Bob' } - it doesn't print "age: undefined"
 
 // @@@ 'private' keyword vs. using the # syntax for private fields
 
-// >>> 'private' keyword
-// The private keyword is a TypeScript-specific feature that enforces encapsulation at the TypeScript type level.
-// It means that the property or method is accessible only within the class it is declared in.
-// However, this encapsulation is inforced only at compile time by TypeScript.
-// It's not enforced at runtime, as it gets transpiled to regular JavaScript.
-// At runtime, the property is still accessible via standard JavaScript means (e.g., using bracket notation):
-class MySafe {
-  private secretKey = 12345;
-}
-const s = new MySafe();
-console.log(s.secretKey); // error: Property 'secretKey' is private and only accessible within class 'MySafe'.
-console.log(s["secretKey"]); // ooops... that is allowed! :-(
-
-// >>> The # syntax for private fields
-// It's a feature of the JavaScript language itself, introduced in ECMAScript 2019 (ES10).
+// >>> The # syntax for private fields:
+#secretVar: string;
+// It's a feature of the JavaScript language, introduced in ECMAScript 2019 (ES10).
 // Is truly private and is enforced at runtime by JavaScript.
 // The property is not accessible outside the class under any circumstances, even by TypeScript.
-class Example {
-  #x: number;
-  constructor(x: number) { this.#x = x; }
-  getX(): number { return this.#x; }
+
+// >>> 'private' keyword:
+private secretVar: string;
+// The private keyword is a TypeScript-specific feature, so the encapsulation is inforced only at compile time.
+// It's not enforced at runtime, as it gets transpiled to regular JavaScript.
+// At runtime, the property is still accessible via standard JavaScript means (e.g., using bracket notation).
+
+// An example demonstrating both the approaches:
+
+class MySafe {
+  #declaredWitPound = 123;
+  private declaredWitPrivateKeyword = 456;
 }
-const example = new Example(10);
-console.log(example.getX()); // 10
-console.log(example.#x); // Error: Private field '#x' must be declared in an enclosing class
+const s = new MySafe();
+console.log(s.#declaredWitPound); // error: Property '#declaredWitPound' is not accessible outside class 'MySafe' because it has a private identifier.
+console.log(s["declaredWitPound"]); // error: Property '#declaredWitPound' is not accessible outside class 'Example' because it has a private identifier.
+console.log(s.declaredWitPrivateKeyword); // error: Property 'declaredWitPrivateKeyword' is private and only accessible within class 'MySafe'.
+console.log(s["declaredWitPrivateKeyword"]); // ooops... that is allowed! :-(
 
 // @@@ Cross-instance private access
 // Different OOP languages disagree about whether different instances of the same class may access each others’ private members.
 // While languages like Java, C#, C++, Swift, and PHP allow this, Ruby does not.
-// TypeScript does allow cross-instance private access (which is wrong since it breaks the main principle of incapsulation):
+// TypeScript does allow cross-instance private access:
 class A {
   private x = 10;
  
@@ -138,6 +136,7 @@ class A {
     return other.x === this.x; // no error
   }
 }
+// That is completely wrong since an object accesses a private property of ANOTHER object. That breaks the main principle of incapsulation!
 
 // @@@ Property shadowing
 
@@ -180,78 +179,142 @@ class Derived2 extends Base {
 // @@@ Parameter Properties
 
 // TypeScript offers special syntax for turning a constructor parameter into a class property with the same name and value.
-// Parameter properties are created by prefixing a constructor argument with one of the visibility modifiers public, private, protected, or readonly.
+// Parameter properties are created by prefixing a constructor parameter with one of the visibility modifiers public, private, protected, or readonly.
 //      and automatically populated with the values passed.
 
 // Parameter properties allow you to define and initialize properties directly in the constructor parameters.
 // This feature helps reduce boilerplate code when you need to initialize class properties with values passed to the constructor.
 
+// Firstly, let's see the classic pattern: properties are declared in the regular way and initialized in the constructor:
+
 class Person {
-  constructor(
-    public name: string, // Public property
-    private age: number, // Private property
-    protected address: string, // Protected property
-  ) {}
+  public name: string;
+  private age: number;
+  protected address: string;
+
+  constructor(name: string, age: number, address: string) {
+    this.name = name;
+    this.age = age;
+    this.address = address;
+  }
+  
+  // ...
 }
 
-const person = new Person('Alice', 30, '123 Main St');
-console.log(person.name); // Alice
-console.log(person.age); // Error: Property 'age' is private and only accessible within class 'Person'.
-console.log(person.address); // Error: Property 'address' is protected and only accessible within class 'Person' and its subclasses.
+// Sample usage:
+let phil = new Person("Phil", 38, "99 Main St");
 
-// You cannot use # with parameter properties directly. Instead, you need to declare these fields and initialize them within the constructor:
+// Now, let's convert the regular properties into parameter properties:
+
+class Person {
+  constructor(public name: string, private age: number, protected address: string) {}
+  // ...
+}
+
+// Sample usage is the same.
+
+// Look how radically the code length has decreased!
+
+// BTW, you cannot use # with parameter properties. Instead, you need to declare these fields and initialize them in the constructor manually:
 class Person {
   #age: number; // a truly private field with #
 
-  constructor(
-    public name: string,
-    age: number, // regular parameter, not a parameter property
-    protected address: string,
-  ) {
-    this.#age = age; // initialize it inside the constructor
+  // Note that the age parameter doesn't have an access modifier since it's a regular parameter, not a parameter property:
+  constructor(public name: string, age: number, protected address: string) {
+    this.#age = age; // initialize it in the constructor manually
   }
 
-  getAge() { return this.#age; }
+  // ...
 }
 
-// @@@ Getters / setters:
+// A parameter property can be declared readonly in combination with public, private, or protected.
+// For that, add 'readonly' AFTER the access modifier. Let's add a readonly id parameter property:
+class Person {
+  constructor(public readonly id: number, public name: string, private age: number, protected address: string) {}
+  // ...
+}
 
-// Methods which are called using "variable-like" syntax:
+// @@@ Getters / setters
+
+// Those are methods which are called using "variable-like" syntax.
+
+class GetterSetterDemo {
+  // Getter defines a method to retrieve a property value. Must have no parameters and return a value:
+  get age(): number { ... }
+
+  // Setter defines a method to set a property value. Must have exactly one parameter (of the same type the Getter returns) and return void:
+  set age(val: number) { ... }
+  // The setter parameter is traditionally named 'val' or 'value' to avoid using the same name as the setter like: set age(age: ...
+}
+
+// They are methods, but you work with them as if they would be fields (instance variables):
+let gsd = new GetterSetterDemo();
+let oldAge = gsd.age; // looks like reading from a variable but it's calling a function (the getter)
+gsd.age = 18; // looks like populating a variable but it's calling a function (the setter)
+
+// Public getter and setter with a private backing variable is a classic pattern:
+
 class ClassWithAccessors {
-	#id: number | undefined;
-	get id() {
-		return <number>this.#id;
-	}
-	set id(value: number) {
-		this.#id = value;
-	}
+  #id?: number;
+
+  get id(): number | undefined {
+    return this.#id;
+  }
+
+  set id(val: number | undefined) {
+    this.#id = val;
+  }
 }
-var classWithAccessors = new ClassWithAccessors();
-classWithAccessors.id = 2; // the setter is called
-console.log('id property is set to ${classWithAccessors.id}'); // the getter is called
-// TypeScript has some special inference rules for accessors:
-//		If get exists but no set, the property is automatically readonly
-//		If the type of the setter parameter is not specified, it is inferred from the return type of the getter
-//		Getters and setters must have the same Member Visibility (both public/protected/private).
+
+var cwa = new ClassWithAccessors();
+cwa.id = 2;
+console.log('id property is set to ${cwa.id}');
+
+// Getter and setter are connected by name - they must have the exact same name to form a single logical property.
+// They also must have the same type and visibility (public/protected/private).
+// If the type of the setter parameter is not specified, it is inferred from the return type of the getter.
+
+// But note that the getter and the setter are only logically related to their backing field (#id), via your code.
+// The compiler does not associate them in any way.
+// The variable has the same name as the getter and the setter, but this is just a useful naming convention to demonstrate the relation.
+
+// You can even define getters and setters without a backing field.
+// For example, if the logic is computed, derived, or uses an external storage for the value.
+// In the next class, name is stored in the DB rather than in a backing field of the same object:
+class NameController {
+  #webApi = new NameWebApi();
+
+  get name(): string {
+    return this.#webApi.getName(); // retrieve name from a DB through a web service
+  }
+
+  set name(val: string) {
+    this.#webApi.saveName(val); // save name in the DB through a web service
+  }
+}
+
+let nc = new RemoteValue();
+console.log(nc.name);
+nc.name = "Steve";
+
+// You can define a getter without a setter (read-only), or a setter without a getter (write-only, rarely used).
 
 // @@@ Fake final classes
 
-// Although TypeScript does not support the final keyword for classes and methods, it can be easily faked.
-// To fake final classes in TypeScript, you can use private constructors:
-class MessageQueue {
-	private constructor(private messages: string[]) {}
-}
-// When a constructor is marked as private, you cannot use new in the class or extend it:
-class BadQueue extends MessageQueue {} // Error: Cannot extend class 'MessageQueue'. The class constructor is marked as private.
-new MessageQueue([]) // Error: The constructor of class 'MessageQueue' is private and accessible only within the class declaration.
-// In addition to preventing the class from being extended, private constructors also prevent the class from being instantiated directly (which is not what we want).
-// To enable creation of instances of your class, add a factory function:
+// Although TypeScript does not support the final keyword for classes and methods, the functionality can be easily faked.
+// To fake final classes in TypeScript, create a class which has:
+//    1. A private constructor. When a constructor is marked as private, you cannot use 'new' in the class or extend it.
+//    2. A factory function to enable creation of instances.
 class MessageQueue {
 	private constructor(private messages: string[]) {}
 	static getInstance(messages: string[]) {
 		return new MessageQueue(messages)
 	}
 }
+
+class BadQueue extends MessageQueue {} // Error: Cannot extend class 'MessageQueue'. The class constructor is marked as private.
+let mq = new MessageQueue(["a", "b"]); // Error: The constructor of class 'MessageQueue' is private and accessible only within the class declaration.
+let mq =  MessageQueue.getInstance(["a", "b"]); // success
 
 // @@@ Abstract classes and abstract methods
 
@@ -267,26 +330,26 @@ abstract class Animal {
   move(): void { console.log("Roaming the earth..."); } // non-abstract method (can be used directly or overridden by derived classes)
 }
 
-// Derived class that extends the abstract class and implements the abstract method
+// Derived class that extends the abstract class and implements the abstract method:
 class Dog extends Animal {
-  makeSound(): void { console.log("Woof! Woof!"); } // implementation of the abstract method
+  makeSound(): void { console.log("Woof!"); } // implementation of the abstract method
 }
 
 class Cat extends Animal {
-  makeSound(): void { console.log("Meow! Meow!"); } // implementation of the abstract method
+  makeSound(): void { console.log("Meow!"); } // implementation of the abstract method
 }
 
 const animal = new Animal(); // Error: Cannot create an instance of an abstract class.
 
 const dog = new Dog();
-dog.makeSound(); // Output: Woof! Woof!
+dog.makeSound(); // Output: Woof!
 dog.move();      // Output: Roaming the earth...
 
 const cat = new Cat();
-cat.makeSound(); // Output: Meow! Meow!
+cat.makeSound(); // Output: Meow!
 cat.move();      // Output: Roaming the earth...
 
-// @@@ Inheritance:
+// @@@ Inheritance
 
 // Function in descendand overrides the function with the same sugnature in the ancestor.
 // The "super" keyword can be used in the descentant to call the overridden version.
@@ -363,7 +426,7 @@ class MyClass {
   static count: number;
   static description: string;
 
-  // Static block to initialize static properties
+  // Static block to initialize static properties:
   static {
     MyClass.count = 0;
     MyClass.description = 'This is a static block example';
@@ -382,4 +445,4 @@ console.log(MyClass.getCount()); // Output: 2
 // >>> No static classes
 // Unlike some other programming languages (like C#), TypeScript does not have the concept of static classes.
 // A static class is a class that cannot be instantiated and is used to group related static methods and properties.
-// To mimic it in TypeScript, just create a regular class with all vars & methods static, and a private constructor and with no factory method.
+// To mimic it in TypeScript, just create a regular class with all vars & methods static, with a private constructor, and with no factory method.
